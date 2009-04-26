@@ -19,7 +19,8 @@ In this specification document:
 MODES
 =====
 
-The Omron 790IT has 3 data retrieval modes that need to be set before data can be pulled from the unit. These data modes are set by way of HID Feature Requests. All feature requests are 3 bytes (1 report ID, always 0, and 2 data bytes).
+The Omron 790IT has 3 data retrieval modes that need to be set before data can be pulled from the unit. 
+These data modes are set by way of HID Feature Requests. All feature requests are 3 bytes (1 report ID, always 0, and 2 data bytes).
 
 Device Information:
 Data - 0x01 0x01
