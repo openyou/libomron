@@ -1,4 +1,10 @@
 Omron 790IT Protocol Documentation
+by Kyle Machulis
+http://www.nonpolynomial.com
+
+====================
+PROTOCOL INFORMATION
+====================
 
 All output reports are 9 bytes (1 report ID, always 0, 8 data)
 
