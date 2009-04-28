@@ -174,7 +174,6 @@ Byte 3: Number of available sessions (NEED TO CONFIRM)
 
 Output Report example:
 0x47 0x44 0x43 0x00 0x00 0x00 0x00 0x01
-0x53 0x52 0x4c 0x30 0x30
 
 Output Report example in HID format:
 0x07 0x47 0x44 0x43 0x00 0x00 0x00 0x00 
@@ -205,7 +204,7 @@ Parameters:
 Index of record, last 2 bytes of command
 
 Return:
-8 bytes (3 bytes for "OK" success string, 17 bytes, binary)
+17 bytes (3 bytes for "OK" success string, 14 bytes, binary)
 Will sometimes return "NO" message. If this happens, requery using the same command
 
 Return Format:
