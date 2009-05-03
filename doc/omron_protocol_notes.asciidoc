@@ -1,0 +1,459 @@
+Omron 790IT Protocol Documentation
+==================================
+Kyle Machulis <kyle@nonpolynomial.com>
+http://www.nonpolynomial.com
+
+
+== Protocol Information ==
+
+In this specification document:
+0xXX:: refers to a byte that is ignored and can take any value
+0x??:: refers to a byte that is significant but make change values
+
+All output reports are 9 bytes (1 report ID, always 0, 8 data)
+
+In input and output reports, the first data byte specifies the number of "valid" bytes in the packet. Count starts after the count byte, all bytes after the count are ignored.
+
+i.e. In the packet 
+---------------------------------------
+0x05 0x01 0x02 0x03 0x04 0x05 0x06 0x07
+---------------------------------------
+
+Only bytes 1-5 are used, and would look like this in our notation
+---------------------------------------
+0x05 0x01 0x02 0x03 0x04 0x05 0xXX 0xXX
+---------------------------------------
+
+0x06 0x07 are ignored and can be anything.
+
+For commands, the first 3 bytes specify the command. Commands may be broken up over multiple output reports
+
+For returns, the first 2-3 bytes specify the status. Returns may be broken up over multiple input reports
+
+Successful input reports will have their first three bytes as
+--------------
+0x4F 0x4B 0x00
+(ASCII: "OK")
+--------------
+
+Unsuccessful input reports will have their first two bytes as 0x4E 0x4F.
+-------------
+0x4E 0x4F
+(ASCII: "NO")
+-------------
+
+Initialization
+--------------
+
+The Omron 790IT has 3 data retrieval modes that need to be set before data can be pulled from the unit. 
+These data modes are set by way of HID Feature Requests. All feature requests are 3 bytes (1 report ID, always 0, and 2 data bytes).
+
+.Device Information
+---------
+0x01 0x01
+---------
+
+.Individual Reading Information
+---------
+0x74 0xbc
+---------
+
+.Weekly Average Information
+---------
+0x10 0x74
+---------
+
+After a mode is set, a 'clearing block' is sent. These consist of:
+
+- 7 bytes out, all 0
+- 7 bytes in, all 0
+- 3 packets of 7 bytes out, all 0
+- 1 packet of 2 bytes out, all 0
+- One packet in of success status message, otherwise repeat above two steps
+
+== Device Information Mode Commands ==
+
+=== Get Unit Version ===
+
+==== Description ====
+Used to retrieve the version of the unit, in ASCII string format
+
+==== Command ====
+------------------------
+0x56 0x45 0x52 0x30 0x30 
+(ASCII: "VER00")
+------------------------
+
+==== Parameters ====
+None
+
+==== Return Format ====
+15 bytes (3 bytes for "OK" success string, 12 byte ASCII string, not null terminated, giving the unit version)
+
+==== Output Report Example ====
+------------------------
+0x56 0x45 0x52 0x30 0x30 
+------------------------
+
+==== Output Report Example in HID Raw Report Format ====
+---------------------------------------
+0x05 0x56 0x45 0x52 0x30 0x30 0xXX 0xXX
+---------------------------------------
+
+==== Return Example ====
+-----------------------------------------------------------
+0x4d 0x37 0x30 0x38 0x30 0x49 0x54 0x20 0x32 0x30 0x37 0x4a
+(ASCII: 'M7080IT 207J')
+----------------------------------------------------------- 
+
+==== Return Example in HID Raw Report Format ====
+---------------------------------------
+0x07 0x4f 0x4b 0x00 0x4d 0x37 0x30 0x38 
+0x07 0x30 0x49 0x54 0x20 0x32 0x30 0x37 
+0x01 0x4a 0xXX 0xXX 0xXX 0xXX 0xXX 0xXX
+---------------------------------------
+
+=== Get Unit PRF ===
+
+==== Description ====
+Used to retrieve whatever the 'PRF' is for the unit. ASCII string, could be some sort of odd bitfield?
+
+==== Command ====
+------------------------
+0x50 0x52 0x46 0x30 0x30
+(ASCII: "PRF00")
+------------------------
+
+==== Parameters ====
+None
+
+==== Return Format ====
+14 bytes (3 bytes for "OK" success string, 11 byte ASCII string)
+
+==== Output Report Example ====
+------------------------
+0x50 0x52 0x46 0x30 0x30
+------------------------
+
+==== Output Report Example in HID Raw Report Format ====
+---------------------------------------
+0x05 0x50 0x52 0x46 0x30 0x30 0xXX 0xXX
+---------------------------------------
+
+==== Return Example ====
+------------------------------------------------------
+0x30 0x30 0x31 0x30 0x31 0x30 0x30 0x30 0x30 0x30 0x00
+(ASCII: '00101000')
+------------------------------------------------------
+
+==== Return Example in HID Raw Report Format ====
+---------------------------------------
+0x07 0x4f 0x4b 0x00 0x30 0x30 0x31 0x30 
+0x07 0x31 0x30 0x30 0x30 0x30 0x30 0x00
+---------------------------------------
+
+=== Get Unit SRL ===
+
+==== Description ====
+Used to retrieve whatever the 'SRL' is for the unit. ASCII string, could be serial number?
+
+==== Command ====
+------------------------
+0x53 0x52 0x4c 0x30 0x30
+(ASCII: "SRL00")
+------------------------
+
+==== Parameters ====
+None
+
+==== Return Format ====
+11 bytes (3 bytes for "OK" success string, 8 bytes, binary, not sure of context)
+
+==== Output Report Example ====
+------------------------
+0x53 0x52 0x4c 0x30 0x30
+------------------------
+
+==== Output Report Example in HID Raw Report Format ====
+---------------------------------------
+0x05 0x53 0x52 0x4c 0x30 0x30 0xXX 0xXX
+---------------------------------------
+
+==== Return Example ====
+---------------------------------------
+0x06 0x00 0x00 0x00 0x00 0x00 0x00 0x06
+---------------------------------------
+
+==== Return Example in HID Raw Report Format ====
+---------------------------------------
+0x07 0x4f 0x4b 0x00 0x06 0x00 0x00 0x00
+0x04 0x00 0x00 0x00 0x06 0xXX 0xXX 0xXX
+---------------------------------------
+
+== Individual Reading Mode Commands ==
+
+=== Get Individual Reading Count ===
+
+==== Description ====
+Used to retreive how many sessions are currently stored on the machine
+
+==== Command ====
+---------------------------------------
+0x47 0x44 0x43 0x00 0x00 0x00 0x00 0x0?
+ASCII: "GDC" (Get Data Count?)
+---------------------------------------
+
+==== Parameters ====
+Which bank to query, last byte of command (NEED TO CONFIRM)
+
+==== Return Format ====
+8 bytes (3 bytes for "OK" success string, 5 bytes, binary, not sure of context)
+
+Byte 3: Number of available sessions
+
+==== Output Report Example ====
+---------------------------------------
+0x47 0x44 0x43 0x00 0x00 0x00 0x00 0x01
+---------------------------------------
+
+==== Output Report Example in HID Raw Report Format ====
+---------------------------------------
+0x07 0x47 0x44 0x43 0x00 0x00 0x00 0x00 
+0x01 0x01 0xXX 0xXX 0xXX 0xXX 0xXX 0xXX
+---------------------------------------
+
+==== Return Example ====
+------------------------
+0x00 0x0a 0x00 0x08 0x02
+------------------------
+
+==== Return Example in HID Raw Report Format ====
+---------------------------------------
+0x07 0x4f 0x4b 0x00 0x00 0x0a 0x00 0x08
+0x01 0x02 0xXX 0xXX 0xXX 0xXX 0xXX 0xXX
+---------------------------------------
+
+=== Get Individual Reading ===
+
+==== Description ====
+Retrieve information about a single reading
+
+==== Command ====
+---------------------------------------
+0x47 0x4d 0x45 0x00 0x00 0x00 0x0? 0x0?
+ASCII: "GME" (Get Measurement?)
+---------------------------------------
+
+==== Parameters ====
+Index of record, last 2 bytes of command
+
+==== Return Format ====
+17 bytes (3 bytes for "OK" success string, 14 bytes, binary)
+Will sometimes return "NO" message. If this happens, requery using the same command
+
+Byte 0:: Last 2 digits of year
+Byte 1:: Month
+Byte 2:: Day
+Byte 3:: Hour (24-hour format) (NEED TO CONFIRM)
+Byte 4:: Minute 
+Byte 5:: Seconds
+Byte 6:: UNKNOWN
+Byte 7:: UNKNOWN
+Byte 8:: SYS
+Byte 9:: DIA
+Byte A:: Pulse
+Byte B:: UNKNOWN
+Byte C:: Status Flags 
+	 - 0x0X - Standalone reading 
+	 - 0x1X - First reading of a 3 reading average (TruRead function)
+	 - 0x2X - Second reading of a 3 reading average (TruRead function)
+	 - 0x3X - Third reading of a 3 reading average (TruRead function)
+	 - Others: UNKNOWN
+Byte D:: UNKNOWN
+
+==== Output Report Example ====
+Command gets newest available record
+---------------------------------------
+0x47 0x4d 0x45 0x00 0x00 0x00 0x00 0x00
+--------------------------------------- 
+
+==== Output Report Example in HID Raw Report Format ====
+---------------------------------------
+0x07 0x47 0x4d 0x45 0x00 0x00 0x00 0x00
+0x01 0x00 0xXX 0xXX 0xXX 0xXX 0xXX 0xXX
+---------------------------------------
+
+==== Return Example ====
+---------------------------------------------------------------------
+0x07 0x01 0x03 0x00 0x06 0x33 0x00 0x00 0x70 0x4b 0x47 0x00 0x00 0x4c 
+---------------------------------------------------------------------
+
+Year:: 07
+Month:: 01
+Day:: 03
+Hour:: 00
+Minute:: 06
+Seconds:: 33
+SYS:: 0x70 (112) 
+DIA:: 0x4b (75)
+Pulse:: 0x47 (71)
+Read Type:: Standalone
+
+==== Return Example in HID Raw Report Format ====
+---------------------------------------
+0x07 0x4f 0x4b 0x00 0x07 0x01 0x03 0x00 
+0x07 0x06 0x33 0x00 0x00 0x70 0x4b 0x47 
+0x03 0x00 0x00 0x4c 0xXX 0xXX 0xXX 0xXX
+---------------------------------------
+
+== Weekly Average Mode Commands ==
+
+=== Get Weekly Morning Data ===
+
+==== Description ====
+Retrieve information about a weekly morning average
+
+==== Command ====
+--------------------------------------------
+0x47 0x4d 0x41 0x00 0x00 0x0? 0x00 0x00 0x0?
+(ASCII: "GMA" (Get Morning Average))
+--------------------------------------------
+
+==== Parameters ====
+Index of record
+
+==== Return Format ====
+12 bytes (3 bytes for "OK" success string, 9 bytes, binary)
+
+Byte 0:: UNKNOWN
+Byte 1:: UNKNOWN
+Byte 2:: UNKNOWN
+Byte 3:: UNKNOWN
+Byte 4:: UNKNOWN
+Byte 5:: UNKNOWN
+Byte 6:: SYS minus 25 (NEED TO CONFIRM - WTF?!)
+Byte 7:: DIA
+Byte 8:: Pulse
+Byte 9:: UNKNOWN
+
+==== Output Report Example ====
+Command gets 7th record
+--------------------------------------------
+0x47 0x4d 0x41 0x00 0x00 0x06 0x00 0x00 0x06
+--------------------------------------------
+
+==== Output Report Example in HID Raw Report Format ====
+---------------------------------------
+0x07 0x47 0x4d 0x41 0x00 0x00 0x00 0x06 
+0x02 0x00 0x06 0x00 0x00 0x00 0x00 0x00
+---------------------------------------
+
+==== Return Example ====
+--------------------------------------------
+0x80 0x01 0x09 0x04 0x13 0x71 0x69 0x70 0xf7
+-------------------------------------------- 
+
+SYS:: 138 (0x71 + 0x19, unit says 138 though. This lines up across other readings too)
+DIA:: 105 (0x69)
+Pulse:: 112 (0x70)
+
+==== Return Example in HID Raw Report Format ====
+---------------------------------------
+0x07 0x4f 0x4b 0x00 0x80 0x01 0x09 0x04 
+0x05 0x13 0x71 0x69 0x70 0xf7 0xXX 0xXX
+---------------------------------------
+
+=== Get Weekly Evening Data ===
+
+==== Description ====
+Retrieve information about a weekly evening average
+
+==== Command ====
+--------------------------------------------
+0x47 0x4d 0x45 0x00 0x00 0x0? 0x00 0x00 0x0?
+(ASCII: "GEA" (Get Evening Average))
+--------------------------------------------
+
+==== Parameters ====
+Index of record
+
+==== Return Format ====
+12 bytes (3 bytes for "OK" success string, 9 bytes, binary)
+
+Byte 0:: UNKNOWN
+Byte 1:: UNKNOWN
+Byte 2:: UNKNOWN
+Byte 3:: UNKNOWN
+Byte 4:: UNKNOWN
+Byte 5:: UNKNOWN
+Byte 6:: SYS minus 25 (NEED TO CONFIRM)
+Byte 7:: DIA
+Byte 8:: Pulse
+Byte 9:: UNKNOWN
+
+==== Output Report Example ====
+Command gets 7th record
+--------------------------------------------
+0x47 0x4d 0x45 0x00 0x00 0x06 0x00 0x00 0x06
+--------------------------------------------
+
+==== Output Report Example in HID Raw Report Format ====
+---------------------------------------
+0x07 0x47 0x4d 0x45 0x00 0x00 0x00 0x06 
+0x02 0x00 0x06 0x00 0x00 0x00 0x00 0x00
+---------------------------------------
+
+==== Return Example ====
+--------------------------------------------
+0x80 0x01 0x09 0x04 0x13 0x71 0x69 0x70 0xf7 
+--------------------------------------------
+
+SYS:: 138 (0x71 + 0x19, unit says 138 though. This lines up across other readings too)
+DIA:: 105 (0x69)
+Pulse:: 112 (0x70)
+
+==== Return Example in HID Raw Report Format ====
+---------------------------------------
+0x07 0x4f 0x4b 0x00 0x80 0x01 0x09 0x04 
+0x05 0x13 0x71 0x69 0x70 0xf7 0xXX 0xXX
+---------------------------------------
+
+== Utility Commands ==
+
+=== End Data Request ===
+
+==== Description ====
+Notifies the unit that the transfer session is over. Device will turn off after this command is sent.
+
+==== Command ====
+------------------------
+0x45 0x4E 0x44 0xFF 0xFF
+(ASCII: "END")
+------------------------
+
+==== Parameters ====
+None
+
+==== Return Format ====
+5 Bytes (ASCII "OFF\r\n"), signaling that the unit is turning off
+
+==== Output Report Example ====
+------------------------
+0x45 0x4E 0x44 0xFF 0xFF
+------------------------
+
+==== Output Report Example in HID Raw Report Format ====
+---------------------------------------
+0x05 0x45 0x4E 0x44 0xFF 0xFF 0xXX 0xXX
+---------------------------------------
+
+==== Return Example ====
+------------------------
+0x4F 0x46 0x46 0x0D 0x0A
+(ASCII: "OFF\r\n")
+------------------------
+
+==== Return Example in HID Raw Report Format ====
+---------------------------------------
+0x07 0x4F 0x46 0x46 0x0D 0x0A 0xXX 0xXX
+---------------------------------------
