@@ -1,0 +1,1354 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="generator" content="AsciiDoc 8.4.4" />
+<title>Omron 790IT Protocol Documentation</title>
+<style type="text/css">
+/* Debug borders */
+p, li, dt, dd, div, pre, h1, h2, h3, h4, h5, h6 {
+/*
+  border: 1px solid red;
+*/
+}
+
+body {
+  margin: 1em 5% 1em 5%;
+}
+
+a {
+  color: blue;
+  text-decoration: underline;
+}
+a:visited {
+  color: fuchsia;
+}
+
+em {
+  font-style: italic;
+  color: navy;
+}
+
+strong {
+  font-weight: bold;
+  color: #083194;
+}
+
+tt {
+  color: navy;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #527bbd;
+  font-family: sans-serif;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+}
+
+h1, h2, h3 {
+  border-bottom: 2px solid silver;
+}
+h2 {
+  padding-top: 0.5em;
+}
+h3 {
+  float: left;
+}
+h3 + * {
+  clear: left;
+}
+
+div.sectionbody {
+  font-family: serif;
+  margin-left: 0;
+}
+
+hr {
+  border: 1px solid silver;
+}
+
+p {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+ul, ol, li > p {
+  margin-top: 0;
+}
+
+pre {
+  padding: 0;
+  margin: 0;
+}
+
+span#author {
+  color: #527bbd;
+  font-family: sans-serif;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+span#email {
+}
+span#revision {
+  font-family: sans-serif;
+}
+
+div#footer {
+  font-family: sans-serif;
+  font-size: small;
+  border-top: 2px solid silver;
+  padding-top: 0.5em;
+  margin-top: 4.0em;
+}
+div#footer-text {
+  float: left;
+  padding-bottom: 0.5em;
+}
+div#footer-badges {
+  float: right;
+  padding-bottom: 0.5em;
+}
+
+div#preamble {
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+}
+div.tableblock, div.imageblock, div.exampleblock, div.verseblock,
+div.quoteblock, div.literalblock, div.listingblock, div.sidebarblock,
+div.admonitionblock {
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+}
+div.admonitionblock {
+  margin-top: 2.5em;
+  margin-bottom: 2.5em;
+}
+
+div.content { /* Block element content. */
+  padding: 0;
+}
+
+/* Block element titles. */
+div.title, caption.title {
+  color: #527bbd;
+  font-family: sans-serif;
+  font-weight: bold;
+  text-align: left;
+  margin-top: 1.0em;
+  margin-bottom: 0.5em;
+}
+div.title + * {
+  margin-top: 0;
+}
+
+td div.title:first-child {
+  margin-top: 0.0em;
+}
+div.content div.title:first-child {
+  margin-top: 0.0em;
+}
+div.content + div.title {
+  margin-top: 0.0em;
+}
+
+div.sidebarblock > div.content {
+  background: #ffffee;
+  border: 1px solid silver;
+  padding: 0.5em;
+}
+
+div.listingblock > div.content {
+  border: 1px solid silver;
+  background: #f4f4f4;
+  padding: 0.5em;
+}
+
+div.quoteblock {
+  padding-left: 2.0em;
+  margin-right: 10%;
+}
+div.quoteblock > div.attribution {
+  padding-top: 0.5em;
+  text-align: right;
+}
+
+div.verseblock {
+  padding-left: 2.0em;
+  margin-right: 10%;
+}
+div.verseblock > div.content {
+  white-space: pre;
+}
+div.verseblock > div.attribution {
+  padding-top: 0.75em;
+  text-align: left;
+}
+/* DEPRECATED: Pre version 8.2.7 verse style literal block. */
+div.verseblock + div.attribution {
+  text-align: left;
+}
+
+div.admonitionblock .icon {
+  vertical-align: top;
+  font-size: 1.1em;
+  font-weight: bold;
+  text-decoration: underline;
+  color: #527bbd;
+  padding-right: 0.5em;
+}
+div.admonitionblock td.content {
+  padding-left: 0.5em;
+  border-left: 2px solid silver;
+}
+
+div.exampleblock > div.content {
+  border-left: 2px solid silver;
+  padding: 0.5em;
+}
+
+div.imageblock div.content { padding-left: 0; }
+div.imageblock img { border: 1px solid silver; }
+span.image img { border-style: none; }
+
+dl {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+dt {
+  margin-top: 0.5em;
+  margin-bottom: 0;
+  font-style: normal;
+  color: navy;
+}
+dd > *:first-child {
+  margin-top: 0.1em;
+}
+
+ul, ol {
+    list-style-position: outside;
+}
+ol.arabic {
+  list-style-type: decimal;
+}
+ol.loweralpha {
+  list-style-type: lower-alpha;
+}
+ol.upperalpha {
+  list-style-type: upper-alpha;
+}
+ol.lowerroman {
+  list-style-type: lower-roman;
+}
+ol.upperroman {
+  list-style-type: upper-roman;
+}
+
+div.compact ul, div.compact ol,
+div.compact p, div.compact p,
+div.compact div, div.compact div {
+  margin-top: 0.1em;
+  margin-bottom: 0.1em;
+}
+
+div.tableblock > table {
+  border: 3px solid #527bbd;
+}
+thead {
+  font-family: sans-serif;
+  font-weight: bold;
+}
+tfoot {
+  font-weight: bold;
+}
+td > div.verse {
+  white-space: pre;
+}
+p.table {
+  margin-top: 0;
+}
+/* Because the table frame attribute is overriden by CSS in most browsers. */
+div.tableblock > table[frame="void"] {
+  border-style: none;
+}
+div.tableblock > table[frame="hsides"] {
+  border-left-style: none;
+  border-right-style: none;
+}
+div.tableblock > table[frame="vsides"] {
+  border-top-style: none;
+  border-bottom-style: none;
+}
+
+
+div.hdlist {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+div.hdlist tr {
+  padding-bottom: 15px;
+}
+dt.hdlist1.strong, td.hdlist1.strong {
+  font-weight: bold;
+}
+td.hdlist1 {
+  vertical-align: top;
+  font-style: normal;
+  padding-right: 0.8em;
+  color: navy;
+}
+td.hdlist2 {
+  vertical-align: top;
+}
+div.hdlist.compact tr {
+  margin: 0;
+  padding-bottom: 0;
+}
+
+.comment {
+  background: yellow;
+}
+
+@media print {
+  div#footer-badges { display: none; }
+}
+
+div#toctitle {
+  color: #527bbd;
+  font-family: sans-serif;
+  font-size: 1.1em;
+  font-weight: bold;
+  margin-top: 1.0em;
+  margin-bottom: 0.1em;
+}
+
+div.toclevel1, div.toclevel2, div.toclevel3, div.toclevel4 {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+div.toclevel2 {
+  margin-left: 2em;
+  font-size: 0.9em;
+}
+div.toclevel3 {
+  margin-left: 4em;
+  font-size: 0.9em;
+}
+div.toclevel4 {
+  margin-left: 6em;
+  font-size: 0.9em;
+}
+/* Workarounds for IE6's broken and incomplete CSS2. */
+
+div.sidebar-content {
+  background: #ffffee;
+  border: 1px solid silver;
+  padding: 0.5em;
+}
+div.sidebar-title, div.image-title {
+  color: #527bbd;
+  font-family: sans-serif;
+  font-weight: bold;
+  margin-top: 0.0em;
+  margin-bottom: 0.5em;
+}
+
+div.listingblock div.content {
+  border: 1px solid silver;
+  background: #f4f4f4;
+  padding: 0.5em;
+}
+
+div.quoteblock-attribution {
+  padding-top: 0.5em;
+  text-align: right;
+}
+
+div.verseblock-content {
+  white-space: pre;
+}
+div.verseblock-attribution {
+  padding-top: 0.75em;
+  text-align: left;
+}
+
+div.exampleblock-content {
+  border-left: 2px solid silver;
+  padding-left: 0.5em;
+}
+
+/* IE6 sets dynamically generated links as visited. */
+div#toc a:visited { color: blue; }
+</style>
+<script type="text/javascript">
+/*<![CDATA[*/
+window.onload = function(){generateToc(2)}
+/* Author: Mihai Bazon, September 2002
+ * http://students.infoiasi.ro/~mishoo
+ *
+ * Table Of Content generator
+ * Version: 0.4
+ *
+ * Feel free to use this script under the terms of the GNU General Public
+ * License, as long as you do not remove or alter this notice.
+ */
+
+ /* modified by Troy D. Hanson, September 2006. License: GPL */
+ /* modified by Stuart Rackham, October 2006. License: GPL */
+
+function getText(el) {
+  var text = "";
+  for (var i = el.firstChild; i != null; i = i.nextSibling) {
+    if (i.nodeType == 3 /* Node.TEXT_NODE */) // IE doesn't speak constants.
+      text += i.data;
+    else if (i.firstChild != null)
+      text += getText(i);
+  }
+  return text;
+}
+
+function TocEntry(el, text, toclevel) {
+  this.element = el;
+  this.text = text;
+  this.toclevel = toclevel;
+}
+
+function tocEntries(el, toclevels) {
+  var result = new Array;
+  var re = new RegExp('[hH]([2-'+(toclevels+1)+'])');
+  // Function that scans the DOM tree for header elements (the DOM2
+  // nodeIterator API would be a better technique but not supported by all
+  // browsers).
+  var iterate = function (el) {
+    for (var i = el.firstChild; i != null; i = i.nextSibling) {
+      if (i.nodeType == 1 /* Node.ELEMENT_NODE */) {
+        var mo = re.exec(i.tagName)
+        if (mo)
+          result[result.length] = new TocEntry(i, getText(i), mo[1]-1);
+        iterate(i);
+      }
+    }
+  }
+  iterate(el);
+  return result;
+}
+
+// This function does the work. toclevels = 1..4.
+function generateToc(toclevels) {
+  var toc = document.getElementById("toc");
+  var entries = tocEntries(document.getElementsByTagName("body")[0], toclevels);
+  for (var i = 0; i < entries.length; ++i) {
+    var entry = entries[i];
+    if (entry.element.id == "")
+      entry.element.id = "toc" + i;
+    var a = document.createElement("a");
+    a.href = "#" + entry.element.id;
+    a.appendChild(document.createTextNode(entry.text));
+    var div = document.createElement("div");
+    div.appendChild(a);
+    div.className = "toclevel" + entry.toclevel;
+    toc.appendChild(div);
+  }
+  if (entries.length == 0)
+    document.getElementById("header").removeChild(toc);
+}
+/*]]>*/
+</script>
+</head>
+<body>
+<div id="header">
+<h1>Omron 790IT Protocol Documentation</h1>
+<span id="author">Kyle Machulis</span><br />
+<span id="email"><tt>&lt;<a href="mailto:kyle@nonpolynomial.com">kyle@nonpolynomial.com</a>&gt;</tt></span><br />
+<span id="revision">version 1.0,</span>
+May 2 2009
+<div id="toc">
+  <div id="toctitle">Table of Contents</div>
+  <noscript><p><b>JavaScript must be enabled in your browser to display the table of contents.</b></p></noscript>
+</div>
+</div>
+<h2 id="_introduction">1. Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>This document outlines the USB HID based protocol for the Omron 790IT
+Blood Pressure Monitor. The protocol allows a user to download
+information that was stored on the unit over multiple usages.</p></div>
+</div>
+<h2 id="_document_notation">2. Document Notation</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The following notation is used in the packet formats in this document</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+0xXX
+</dt>
+<dd>
+<p>
+refers to a byte that is ignored and can take any value
+</p>
+</dd>
+<dt class="hdlist1">
+0x??
+</dt>
+<dd>
+<p>
+refers to a byte that is significant but variable
+</p>
+</dd>
+</dl></div>
+</div>
+<h2 id="_protocol_information">3. Protocol Information</h2>
+<div class="sectionbody">
+<h3 id="_protocol_format">3.1. Protocol Format</h3><div style="clear:left"></div>
+<div class="paragraph"><p>The protocol itself does not follow the normal USB HID specification,
+instead catching and using the raw reports with its own format. It
+does this in order to bypass driver installation on Windows based
+machines.</p></div>
+<div class="paragraph"><p>All output reports are 9 bytes (1 report ID, always 0, 8 data)</p></div>
+<div class="paragraph"><p>In input and output reports, the first data byte specifies the number
+of "valid" bytes in the packet. Count starts after the count byte, all
+bytes after the count are ignored.</p></div>
+<div class="paragraph"><p>i.e. In the packet</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x05 0x01 0x02 0x03 0x04 0x05 0x06 0x07</tt></pre>
+</div></div>
+<div class="paragraph"><p>Only bytes 1-5 are used, and would look like this in our notation</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x05 0x01 0x02 0x03 0x04 0x05 0xXX 0xXX</tt></pre>
+</div></div>
+<div class="paragraph"><p>0x06 0x07 are ignored and can be anything.</p></div>
+<h3 id="_command_status">3.2. Command Status</h3><div style="clear:left"></div>
+<div class="paragraph"><p>For commands, the first 3 bytes specify the command. Commands may be
+broken up over multiple output reports</p></div>
+<div class="paragraph"><p>For returns, the first 2-3 bytes specify the status. Returns may be
+broken up over multiple input reports</p></div>
+<div class="paragraph"><p>Successful input reports will have their first three bytes as</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x4F 0x4B 0x00
+(ASCII: "OK")</tt></pre>
+</div></div>
+<div class="paragraph"><p>Unsuccessful input reports will have their first two bytes as 0x4E 0x4F.</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x4E 0x4F
+(ASCII: "NO")</tt></pre>
+</div></div>
+</div>
+<h2 id="_initialization">4. Initialization</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The Omron 790IT has 3 data retrieval modes that need to be set before
+data can be pulled from the unit.</p></div>
+<div class="paragraph"><p>These data modes are set by way of HID Feature Requests. All feature
+requests are 3 bytes (1 report ID, always 0, and 2 data bytes).</p></div>
+<div class="listingblock">
+<div class="title">Device Information</div>
+<div class="content">
+<pre><tt>0x01 0x01</tt></pre>
+</div></div>
+<div class="listingblock">
+<div class="title">Individual Reading Information</div>
+<div class="content">
+<pre><tt>0x74 0xbc</tt></pre>
+</div></div>
+<div class="listingblock">
+<div class="title">Weekly Average Information</div>
+<div class="content">
+<pre><tt>0x10 0x74</tt></pre>
+</div></div>
+<div class="paragraph"><p>After a mode is set, a <em>clearing block</em> is sent. These consist of:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+7 bytes out, all 0
+</p>
+</li>
+<li>
+<p>
+7 bytes in, all 0
+</p>
+</li>
+<li>
+<p>
+3 packets of 7 bytes out, all 0
+</p>
+</li>
+<li>
+<p>
+1 packet of 2 bytes out, all 0
+</p>
+</li>
+<li>
+<p>
+One packet in of success status message, otherwise repeat above two steps
+</p>
+</li>
+</ul></div>
+</div>
+<h2 id="_device_information_mode_commands">5. Device Information Mode Commands</h2>
+<div class="sectionbody">
+<h3 id="_get_unit_version">5.1. Get Unit Version</h3><div style="clear:left"></div>
+<h4 id="_description">5.1.1. Description</h4>
+<div class="paragraph"><p>Used to retrieve the version of the unit, in ASCII string format</p></div>
+<h4 id="_command">5.1.2. Command</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x56 0x45 0x52 0x30 0x30
+(ASCII: "VER00")</tt></pre>
+</div></div>
+<h4 id="_parameters">5.1.3. Parameters</h4>
+<div class="paragraph"><p>None</p></div>
+<h4 id="_return_format">5.1.4. Return Format</h4>
+<div class="paragraph"><p>15 bytes (3 bytes for "OK" success string, 12 byte ASCII string, not
+null terminated, giving the unit version)</p></div>
+<h4 id="_output_report_example">5.1.5. Output Report Example</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x56 0x45 0x52 0x30 0x30</tt></pre>
+</div></div>
+<h4 id="_output_report_example_in_hid_raw_report_format">5.1.6. Output Report Example in HID Raw Report Format</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x05 0x56 0x45 0x52 0x30 0x30 0xXX 0xXX</tt></pre>
+</div></div>
+<h4 id="_return_example">5.1.7. Return Example</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x4d 0x37 0x30 0x38 0x30 0x49 0x54 0x20 0x32 0x30 0x37 0x4a
+(ASCII: 'M7080IT 207J')</tt></pre>
+</div></div>
+<h4 id="_return_example_in_hid_raw_report_format">5.1.8. Return Example in HID Raw Report Format</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x07 0x4f 0x4b 0x00 0x4d 0x37 0x30 0x38
+0x07 0x30 0x49 0x54 0x20 0x32 0x30 0x37
+0x01 0x4a 0xXX 0xXX 0xXX 0xXX 0xXX 0xXX</tt></pre>
+</div></div>
+<h3 id="_get_unit_prf">5.2. Get Unit PRF</h3><div style="clear:left"></div>
+<h4 id="_description_2">5.2.1. Description</h4>
+<div class="paragraph"><p>Used to retrieve whatever the <em>PRF</em> is for the unit. ASCII string,
+could be some sort of odd bitfield?</p></div>
+<h4 id="_command_2">5.2.2. Command</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x50 0x52 0x46 0x30 0x30
+(ASCII: "PRF00")</tt></pre>
+</div></div>
+<h4 id="_parameters_2">5.2.3. Parameters</h4>
+<div class="paragraph"><p>None</p></div>
+<h4 id="_return_format_2">5.2.4. Return Format</h4>
+<div class="paragraph"><p>14 bytes (3 bytes for "OK" success string, 11 byte ASCII string)</p></div>
+<h4 id="_output_report_example_2">5.2.5. Output Report Example</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x50 0x52 0x46 0x30 0x30</tt></pre>
+</div></div>
+<h4 id="_output_report_example_in_hid_raw_report_format_2">5.2.6. Output Report Example in HID Raw Report Format</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x05 0x50 0x52 0x46 0x30 0x30 0xXX 0xXX</tt></pre>
+</div></div>
+<h4 id="_return_example_2">5.2.7. Return Example</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x30 0x30 0x31 0x30 0x31 0x30 0x30 0x30 0x30 0x30 0x00
+(ASCII: '00101000')</tt></pre>
+</div></div>
+<h4 id="_return_example_in_hid_raw_report_format_2">5.2.8. Return Example in HID Raw Report Format</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x07 0x4f 0x4b 0x00 0x30 0x30 0x31 0x30
+0x07 0x31 0x30 0x30 0x30 0x30 0x30 0x00</tt></pre>
+</div></div>
+<h3 id="_get_unit_srl">5.3. Get Unit SRL</h3><div style="clear:left"></div>
+<h4 id="_description_3">5.3.1. Description</h4>
+<div class="paragraph"><p>Used to retrieve whatever the <em>SRL</em> is for the unit. ASCII string,
+could be serial number?</p></div>
+<h4 id="_command_3">5.3.2. Command</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x53 0x52 0x4c 0x30 0x30
+(ASCII: "SRL00")</tt></pre>
+</div></div>
+<h4 id="_parameters_3">5.3.3. Parameters</h4>
+<div class="paragraph"><p>None</p></div>
+<h4 id="_return_format_3">5.3.4. Return Format</h4>
+<div class="paragraph"><p>11 bytes (3 bytes for "OK" success string, 8 bytes, binary, not
+sure of context)</p></div>
+<h4 id="_output_report_example_3">5.3.5. Output Report Example</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x53 0x52 0x4c 0x30 0x30</tt></pre>
+</div></div>
+<h4 id="_output_report_example_in_hid_raw_report_format_3">5.3.6. Output Report Example in HID Raw Report Format</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x05 0x53 0x52 0x4c 0x30 0x30 0xXX 0xXX</tt></pre>
+</div></div>
+<h4 id="_return_example_3">5.3.7. Return Example</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x06 0x00 0x00 0x00 0x00 0x00 0x00 0x06</tt></pre>
+</div></div>
+<h4 id="_return_example_in_hid_raw_report_format_3">5.3.8. Return Example in HID Raw Report Format</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x07 0x4f 0x4b 0x00 0x06 0x00 0x00 0x00
+0x04 0x00 0x00 0x00 0x06 0xXX 0xXX 0xXX</tt></pre>
+</div></div>
+</div>
+<h2 id="_individual_reading_mode_commands">6. Individual Reading Mode Commands</h2>
+<div class="sectionbody">
+<h3 id="_get_individual_reading_count">6.1. Get Individual Reading Count</h3><div style="clear:left"></div>
+<h4 id="_description_4">6.1.1. Description</h4>
+<div class="paragraph"><p>Used to retreive how many sessions are currently stored on the machine</p></div>
+<h4 id="_command_4">6.1.2. Command</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x47 0x44 0x43 0x00 0x00 0x00 0x00 0x0?
+ASCII: "GDC" (Get Data Count?)</tt></pre>
+</div></div>
+<h4 id="_parameters_4">6.1.3. Parameters</h4>
+<div class="paragraph"><p>Which bank to query, last byte of command (NEED TO CONFIRM)</p></div>
+<h4 id="_return_format_4">6.1.4. Return Format</h4>
+<div class="paragraph"><p>8 bytes (3 bytes for "OK" success string, 5 bytes, binary, not sure of context)</p></div>
+<div class="paragraph"><p>Byte 3: Number of available sessions</p></div>
+<h4 id="_output_report_example_4">6.1.5. Output Report Example</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x47 0x44 0x43 0x00 0x00 0x00 0x00 0x01</tt></pre>
+</div></div>
+<h4 id="_output_report_example_in_hid_raw_report_format_4">6.1.6. Output Report Example in HID Raw Report Format</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x07 0x47 0x44 0x43 0x00 0x00 0x00 0x00
+0x01 0x01 0xXX 0xXX 0xXX 0xXX 0xXX 0xXX</tt></pre>
+</div></div>
+<h4 id="_return_example_4">6.1.7. Return Example</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x00 0x0a 0x00 0x08 0x02</tt></pre>
+</div></div>
+<h4 id="_return_example_in_hid_raw_report_format_4">6.1.8. Return Example in HID Raw Report Format</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x07 0x4f 0x4b 0x00 0x00 0x0a 0x00 0x08
+0x01 0x02 0xXX 0xXX 0xXX 0xXX 0xXX 0xXX</tt></pre>
+</div></div>
+<h3 id="_get_individual_reading">6.2. Get Individual Reading</h3><div style="clear:left"></div>
+<h4 id="_description_5">6.2.1. Description</h4>
+<div class="paragraph"><p>Retrieve information about a single reading</p></div>
+<h4 id="_command_5">6.2.2. Command</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x47 0x4d 0x45 0x00 0x00 0x00 0x0? 0x0?
+ASCII: "GME" (Get Measurement?)</tt></pre>
+</div></div>
+<h4 id="_parameters_5">6.2.3. Parameters</h4>
+<div class="paragraph"><p>Index of record, last 2 bytes of command</p></div>
+<h4 id="_return_format_5">6.2.4. Return Format</h4>
+<div class="paragraph"><p>17 bytes (3 bytes for "OK" success string, 14 bytes, binary)
+Will sometimes return "NO" message. If this happens, requery using the same command</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+Byte 0
+</dt>
+<dd>
+<p>
+Last 2 digits of year
+</p>
+</dd>
+<dt class="hdlist1">
+Byte 1
+</dt>
+<dd>
+<p>
+Month
+</p>
+</dd>
+<dt class="hdlist1">
+Byte 2
+</dt>
+<dd>
+<p>
+Day
+</p>
+</dd>
+<dt class="hdlist1">
+Byte 3
+</dt>
+<dd>
+<p>
+Hour (24-hour format) (NEED TO CONFIRM)
+</p>
+</dd>
+<dt class="hdlist1">
+Byte 4
+</dt>
+<dd>
+<p>
+Minute
+</p>
+</dd>
+<dt class="hdlist1">
+Byte 5
+</dt>
+<dd>
+<p>
+Seconds
+</p>
+</dd>
+<dt class="hdlist1">
+Byte 6
+</dt>
+<dd>
+<p>
+UNKNOWN
+</p>
+</dd>
+<dt class="hdlist1">
+Byte 7
+</dt>
+<dd>
+<p>
+UNKNOWN
+</p>
+</dd>
+<dt class="hdlist1">
+Byte 8
+</dt>
+<dd>
+<p>
+SYS
+</p>
+</dd>
+<dt class="hdlist1">
+Byte 9
+</dt>
+<dd>
+<p>
+DIA
+</p>
+</dd>
+<dt class="hdlist1">
+Byte A
+</dt>
+<dd>
+<p>
+Pulse
+</p>
+</dd>
+<dt class="hdlist1">
+Byte B
+</dt>
+<dd>
+<p>
+UNKNOWN
+</p>
+</dd>
+<dt class="hdlist1">
+Byte C
+</dt>
+<dd>
+<p>
+Status Flags
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+0x0X - Standalone reading
+</p>
+</li>
+<li>
+<p>
+0x1X - First reading of a 3 reading average (TruRead function)
+</p>
+</li>
+<li>
+<p>
+0x2X - Second reading of a 3 reading average (TruRead function)
+</p>
+</li>
+<li>
+<p>
+0x3X - Third reading of a 3 reading average (TruRead function)
+</p>
+</li>
+<li>
+<p>
+Others: UNKNOWN
+</p>
+</li>
+</ul></div>
+</dd>
+<dt class="hdlist1">
+Byte D
+</dt>
+<dd>
+<p>
+UNKNOWN
+</p>
+</dd>
+</dl></div>
+<h4 id="_output_report_example_5">6.2.5. Output Report Example</h4>
+<div class="paragraph"><p>Command gets newest available record</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x47 0x4d 0x45 0x00 0x00 0x00 0x00 0x00</tt></pre>
+</div></div>
+<h4 id="_output_report_example_in_hid_raw_report_format_5">6.2.6. Output Report Example in HID Raw Report Format</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x07 0x47 0x4d 0x45 0x00 0x00 0x00 0x00
+0x01 0x00 0xXX 0xXX 0xXX 0xXX 0xXX 0xXX</tt></pre>
+</div></div>
+<h4 id="_return_example_5">6.2.7. Return Example</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x07 0x01 0x03 0x00 0x06 0x33 0x00 0x00 0x70 0x4b 0x47 0x00 0x00 0x4c</tt></pre>
+</div></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+Year
+</dt>
+<dd>
+<p>
+07
+</p>
+</dd>
+<dt class="hdlist1">
+Month
+</dt>
+<dd>
+<p>
+01
+</p>
+</dd>
+<dt class="hdlist1">
+Day
+</dt>
+<dd>
+<p>
+03
+</p>
+</dd>
+<dt class="hdlist1">
+Hour
+</dt>
+<dd>
+<p>
+00
+</p>
+</dd>
+<dt class="hdlist1">
+Minute
+</dt>
+<dd>
+<p>
+06
+</p>
+</dd>
+<dt class="hdlist1">
+Seconds
+</dt>
+<dd>
+<p>
+33
+</p>
+</dd>
+<dt class="hdlist1">
+SYS
+</dt>
+<dd>
+<p>
+0x70 (112)
+</p>
+</dd>
+<dt class="hdlist1">
+DIA
+</dt>
+<dd>
+<p>
+0x4b (75)
+</p>
+</dd>
+<dt class="hdlist1">
+Pulse
+</dt>
+<dd>
+<p>
+0x47 (71)
+</p>
+</dd>
+<dt class="hdlist1">
+Read Type
+</dt>
+<dd>
+<p>
+Standalone
+</p>
+</dd>
+</dl></div>
+<h4 id="_return_example_in_hid_raw_report_format_5">6.2.8. Return Example in HID Raw Report Format</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x07 0x4f 0x4b 0x00 0x07 0x01 0x03 0x00
+0x07 0x06 0x33 0x00 0x00 0x70 0x4b 0x47
+0x03 0x00 0x00 0x4c 0xXX 0xXX 0xXX 0xXX</tt></pre>
+</div></div>
+</div>
+<h2 id="_weekly_average_mode_commands">7. Weekly Average Mode Commands</h2>
+<div class="sectionbody">
+<h3 id="_get_weekly_morning_data">7.1. Get Weekly Morning Data</h3><div style="clear:left"></div>
+<h4 id="_description_6">7.1.1. Description</h4>
+<div class="paragraph"><p>Retrieve information about a weekly morning average</p></div>
+<h4 id="_command_6">7.1.2. Command</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x47 0x4d 0x41 0x00 0x00 0x0? 0x00 0x00 0x0?
+(ASCII: "GMA" (Get Morning Average))</tt></pre>
+</div></div>
+<h4 id="_parameters_6">7.1.3. Parameters</h4>
+<div class="paragraph"><p>Index of record</p></div>
+<h4 id="_return_format_6">7.1.4. Return Format</h4>
+<div class="paragraph"><p>12 bytes (3 bytes for "OK" success string, 9 bytes, binary)</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+Byte 0
+</dt>
+<dd>
+<p>
+UNKNOWN
+</p>
+</dd>
+<dt class="hdlist1">
+Byte 1
+</dt>
+<dd>
+<p>
+UNKNOWN
+</p>
+</dd>
+<dt class="hdlist1">
+Byte 2
+</dt>
+<dd>
+<p>
+UNKNOWN
+</p>
+</dd>
+<dt class="hdlist1">
+Byte 3
+</dt>
+<dd>
+<p>
+UNKNOWN
+</p>
+</dd>
+<dt class="hdlist1">
+Byte 4
+</dt>
+<dd>
+<p>
+UNKNOWN
+</p>
+</dd>
+<dt class="hdlist1">
+Byte 5
+</dt>
+<dd>
+<p>
+UNKNOWN
+</p>
+</dd>
+<dt class="hdlist1">
+Byte 6
+</dt>
+<dd>
+<p>
+SYS minus 25 (NEED TO CONFIRM - WTF?!)
+</p>
+</dd>
+<dt class="hdlist1">
+Byte 7
+</dt>
+<dd>
+<p>
+DIA
+</p>
+</dd>
+<dt class="hdlist1">
+Byte 8
+</dt>
+<dd>
+<p>
+Pulse
+</p>
+</dd>
+<dt class="hdlist1">
+Byte 9
+</dt>
+<dd>
+<p>
+UNKNOWN
+</p>
+</dd>
+</dl></div>
+<h4 id="_output_report_example_6">7.1.5. Output Report Example</h4>
+<div class="paragraph"><p>Command gets 7th record</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x47 0x4d 0x41 0x00 0x00 0x06 0x00 0x00 0x06</tt></pre>
+</div></div>
+<h4 id="_output_report_example_in_hid_raw_report_format_6">7.1.6. Output Report Example in HID Raw Report Format</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x07 0x47 0x4d 0x41 0x00 0x00 0x00 0x06
+0x02 0x00 0x06 0x00 0x00 0x00 0x00 0x00</tt></pre>
+</div></div>
+<h4 id="_return_example_6">7.1.7. Return Example</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x80 0x01 0x09 0x04 0x13 0x71 0x69 0x70 0xf7</tt></pre>
+</div></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+SYS
+</dt>
+<dd>
+<p>
+138 (0x71 + 0x19, unit says 138 though. This lines up across other readings too)
+</p>
+</dd>
+<dt class="hdlist1">
+DIA
+</dt>
+<dd>
+<p>
+105 (0x69)
+</p>
+</dd>
+<dt class="hdlist1">
+Pulse
+</dt>
+<dd>
+<p>
+112 (0x70)
+</p>
+</dd>
+</dl></div>
+<h4 id="_return_example_in_hid_raw_report_format_6">7.1.8. Return Example in HID Raw Report Format</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x07 0x4f 0x4b 0x00 0x80 0x01 0x09 0x04
+0x05 0x13 0x71 0x69 0x70 0xf7 0xXX 0xXX</tt></pre>
+</div></div>
+<h3 id="_get_weekly_evening_data">7.2. Get Weekly Evening Data</h3><div style="clear:left"></div>
+<h4 id="_description_7">7.2.1. Description</h4>
+<div class="paragraph"><p>Retrieve information about a weekly evening average</p></div>
+<h4 id="_command_7">7.2.2. Command</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x47 0x4d 0x45 0x00 0x00 0x0? 0x00 0x00 0x0?
+(ASCII: "GEA" (Get Evening Average))</tt></pre>
+</div></div>
+<h4 id="_parameters_7">7.2.3. Parameters</h4>
+<div class="paragraph"><p>Index of record</p></div>
+<h4 id="_return_format_7">7.2.4. Return Format</h4>
+<div class="paragraph"><p>12 bytes (3 bytes for "OK" success string, 9 bytes, binary)</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+Byte 0
+</dt>
+<dd>
+<p>
+UNKNOWN
+</p>
+</dd>
+<dt class="hdlist1">
+Byte 1
+</dt>
+<dd>
+<p>
+UNKNOWN
+</p>
+</dd>
+<dt class="hdlist1">
+Byte 2
+</dt>
+<dd>
+<p>
+UNKNOWN
+</p>
+</dd>
+<dt class="hdlist1">
+Byte 3
+</dt>
+<dd>
+<p>
+UNKNOWN
+</p>
+</dd>
+<dt class="hdlist1">
+Byte 4
+</dt>
+<dd>
+<p>
+UNKNOWN
+</p>
+</dd>
+<dt class="hdlist1">
+Byte 5
+</dt>
+<dd>
+<p>
+UNKNOWN
+</p>
+</dd>
+<dt class="hdlist1">
+Byte 6
+</dt>
+<dd>
+<p>
+SYS minus 25 (NEED TO CONFIRM)
+</p>
+</dd>
+<dt class="hdlist1">
+Byte 7
+</dt>
+<dd>
+<p>
+DIA
+</p>
+</dd>
+<dt class="hdlist1">
+Byte 8
+</dt>
+<dd>
+<p>
+Pulse
+</p>
+</dd>
+<dt class="hdlist1">
+Byte 9
+</dt>
+<dd>
+<p>
+UNKNOWN
+</p>
+</dd>
+</dl></div>
+<h4 id="_output_report_example_7">7.2.5. Output Report Example</h4>
+<div class="paragraph"><p>Command gets 7th record</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x47 0x4d 0x45 0x00 0x00 0x06 0x00 0x00 0x06</tt></pre>
+</div></div>
+<h4 id="_output_report_example_in_hid_raw_report_format_7">7.2.6. Output Report Example in HID Raw Report Format</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x07 0x47 0x4d 0x45 0x00 0x00 0x00 0x06
+0x02 0x00 0x06 0x00 0x00 0x00 0x00 0x00</tt></pre>
+</div></div>
+<h4 id="_return_example_7">7.2.7. Return Example</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x80 0x01 0x09 0x04 0x13 0x71 0x69 0x70 0xf7</tt></pre>
+</div></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+SYS
+</dt>
+<dd>
+<p>
+138 (0x71 + 0x19, unit says 138 though. This lines up across
+other readings too)
+</p>
+</dd>
+<dt class="hdlist1">
+DIA
+</dt>
+<dd>
+<p>
+105 (0x69)
+</p>
+</dd>
+<dt class="hdlist1">
+Pulse
+</dt>
+<dd>
+<p>
+112 (0x70)
+</p>
+</dd>
+</dl></div>
+<h4 id="_return_example_in_hid_raw_report_format_7">7.2.8. Return Example in HID Raw Report Format</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x07 0x4f 0x4b 0x00 0x80 0x01 0x09 0x04
+0x05 0x13 0x71 0x69 0x70 0xf7 0xXX 0xXX</tt></pre>
+</div></div>
+</div>
+<h2 id="_utility_commands">8. Utility Commands</h2>
+<div class="sectionbody">
+<h3 id="_end_data_request">8.1. End Data Request</h3><div style="clear:left"></div>
+<h4 id="_description_8">8.1.1. Description</h4>
+<div class="paragraph"><p>Notifies the unit that the transfer session is over. Device will turn
+off after this command is sent.</p></div>
+<h4 id="_command_8">8.1.2. Command</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x45 0x4E 0x44 0xFF 0xFF
+(ASCII: "END")</tt></pre>
+</div></div>
+<h4 id="_parameters_8">8.1.3. Parameters</h4>
+<div class="paragraph"><p>None</p></div>
+<h4 id="_return_format_8">8.1.4. Return Format</h4>
+<div class="paragraph"><p>5 Bytes (ASCII "OFF\r\n"), signaling that the unit is turning off</p></div>
+<h4 id="_output_report_example_8">8.1.5. Output Report Example</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x45 0x4E 0x44 0xFF 0xFF</tt></pre>
+</div></div>
+<h4 id="_output_report_example_in_hid_raw_report_format_8">8.1.6. Output Report Example in HID Raw Report Format</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x05 0x45 0x4E 0x44 0xFF 0xFF 0xXX 0xXX</tt></pre>
+</div></div>
+<h4 id="_return_example_8">8.1.7. Return Example</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x4F 0x46 0x46 0x0D 0x0A
+(ASCII: "OFF\r\n")</tt></pre>
+</div></div>
+<h4 id="_return_example_in_hid_raw_report_format_8">8.1.8. Return Example in HID Raw Report Format</h4>
+<div class="listingblock">
+<div class="content">
+<pre><tt>0x07 0x4F 0x46 0x46 0x0D 0x0A 0xXX 0xXX</tt></pre>
+</div></div>
+</div>
+<h2 id="_further_information">9. Further Information</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>For further information, visit:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+<a href="http://www.github.com/qdot/libomron/">libomron github site</a>
+</p>
+</li>
+<li>
+<p>
+<a href="http://www.nonpolynomial.com/">Nonpolynomial Labs</a>
+</p>
+</li>
+</ul></div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version 1.0<br />
+Last updated 2009-05-02 19:10:21 PDT
+</div>
+</div>
+</body>
+</html>
