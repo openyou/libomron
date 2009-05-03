@@ -1,18 +1,35 @@
 Omron 790IT Protocol Documentation
 ==================================
 Kyle Machulis <kyle@nonpolynomial.com>
-http://www.nonpolynomial.com
+v1.0, May 2 2009
 
+== Introduction ==
+
+This document outlines the USB HID based protocol for the Omron 790IT
+Blood Pressure Monitor. The protocol allows a user to download
+information that was stored on the unit over multiple usages. 
+
+== Document Notation ==
+
+The following notation is used in the packet formats in this document
+
+0xXX:: refers to a byte that is ignored and can take any value
+0x??:: refers to a byte that is significant but variable
 
 == Protocol Information ==
 
-In this specification document:
-0xXX:: refers to a byte that is ignored and can take any value
-0x??:: refers to a byte that is significant but make change values
+=== Protocol Format ===
+
+The protocol itself does not follow the normal USB HID specification,
+instead catching and using the raw reports with its own format. It
+does this in order to bypass driver installation on Windows based
+machines. 
 
 All output reports are 9 bytes (1 report ID, always 0, 8 data)
 
-In input and output reports, the first data byte specifies the number of "valid" bytes in the packet. Count starts after the count byte, all bytes after the count are ignored.
+In input and output reports, the first data byte specifies the number
+of "valid" bytes in the packet. Count starts after the count byte, all
+bytes after the count are ignored.
 
 i.e. In the packet 
 ---------------------------------------
@@ -26,9 +43,13 @@ Only bytes 1-5 are used, and would look like this in our notation
 
 0x06 0x07 are ignored and can be anything.
 
-For commands, the first 3 bytes specify the command. Commands may be broken up over multiple output reports
+=== Command Status ===
 
-For returns, the first 2-3 bytes specify the status. Returns may be broken up over multiple input reports
+For commands, the first 3 bytes specify the command. Commands may be
+broken up over multiple output reports
+
+For returns, the first 2-3 bytes specify the status. Returns may be
+broken up over multiple input reports
 
 Successful input reports will have their first three bytes as
 --------------
@@ -45,8 +66,11 @@ Unsuccessful input reports will have their first two bytes as 0x4E 0x4F.
 Initialization
 --------------
 
-The Omron 790IT has 3 data retrieval modes that need to be set before data can be pulled from the unit. 
-These data modes are set by way of HID Feature Requests. All feature requests are 3 bytes (1 report ID, always 0, and 2 data bytes).
+The Omron 790IT has 3 data retrieval modes that need to be set before
+data can be pulled from the unit. 
+
+These data modes are set by way of HID Feature Requests. All feature
+requests are 3 bytes (1 report ID, always 0, and 2 data bytes).
 
 .Device Information
 ---------
@@ -88,7 +112,8 @@ Used to retrieve the version of the unit, in ASCII string format
 None
 
 ==== Return Format ====
-15 bytes (3 bytes for "OK" success string, 12 byte ASCII string, not null terminated, giving the unit version)
+15 bytes (3 bytes for "OK" success string, 12 byte ASCII string, not
+null terminated, giving the unit version)
 
 ==== Output Report Example ====
 ------------------------
@@ -116,7 +141,8 @@ None
 === Get Unit PRF ===
 
 ==== Description ====
-Used to retrieve whatever the 'PRF' is for the unit. ASCII string, could be some sort of odd bitfield?
+Used to retrieve whatever the 'PRF' is for the unit. ASCII string,
+could be some sort of odd bitfield?
 
 ==== Command ====
 ------------------------
@@ -155,7 +181,8 @@ None
 === Get Unit SRL ===
 
 ==== Description ====
-Used to retrieve whatever the 'SRL' is for the unit. ASCII string, could be serial number?
+Used to retrieve whatever the 'SRL' is for the unit. ASCII string,
+could be serial number?
 
 ==== Command ====
 ------------------------
@@ -167,7 +194,8 @@ Used to retrieve whatever the 'SRL' is for the unit. ASCII string, could be seri
 None
 
 ==== Return Format ====
-11 bytes (3 bytes for "OK" success string, 8 bytes, binary, not sure of context)
+11 bytes (3 bytes for "OK" success string, 8 bytes, binary, not
+sure of context)
 
 ==== Output Report Example ====
 ------------------------
@@ -408,7 +436,8 @@ Command gets 7th record
 0x80 0x01 0x09 0x04 0x13 0x71 0x69 0x70 0xf7 
 --------------------------------------------
 
-SYS:: 138 (0x71 + 0x19, unit says 138 though. This lines up across other readings too)
+SYS:: 138 (0x71 + 0x19, unit says 138 though. This lines up across
+other readings too)
 DIA:: 105 (0x69)
 Pulse:: 112 (0x70)
 
@@ -423,7 +452,8 @@ Pulse:: 112 (0x70)
 === End Data Request ===
 
 ==== Description ====
-Notifies the unit that the transfer session is over. Device will turn off after this command is sent.
+Notifies the unit that the transfer session is over. Device will turn
+off after this command is sent.
 
 ==== Command ====
 ------------------------
@@ -457,3 +487,10 @@ None
 ---------------------------------------
 0x07 0x4F 0x46 0x46 0x0D 0x0A 0xXX 0xXX
 ---------------------------------------
+
+== Further Information ==
+
+For further information, visit:
+
+- http://www.github.com/qdot/libomron/[libomron github site]
+- http://www.nonpolynomial.com/[Nonpolynomial Labs]
