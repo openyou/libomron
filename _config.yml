@@ -1,0 +1,4 @@
+markdown:    maruku
+permalink:   date
+maruku:
+  use_divs:   true
