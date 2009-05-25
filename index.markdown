@@ -1,7 +1,7 @@
 ---
 layout: default
 project: libomron
-title: index
+title: Crossplatform, open source driver for Omron USB products
 ---
 
 Testing markdown again
