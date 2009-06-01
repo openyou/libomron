@@ -1,0 +1,7 @@
+---
+layout: post
+project: libomron
+title: New project website
+---
+
+Decided to try building new project websites for "Nonpolynomial Labs":http://www.nonpolynomial.com projects, using the "jekyll":http://github.com/mojombo/jekyll/tree/master framework provided as a feature on "github":http://www.github.com repositories. Start expecting project updates here.
