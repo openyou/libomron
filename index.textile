@@ -1,5 +1,5 @@
 ---
 layout: front
 project: libomron
-title: Crossplatform, open source driver for Omron USB products
+title: Open source driver for Omron USB products
 ---
