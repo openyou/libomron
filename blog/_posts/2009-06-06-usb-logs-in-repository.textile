@@ -1,0 +1,19 @@
+---
+layout: post
+project: libomron
+title: USB Logs in Repository
+---
+
+Since I don't actually own any of the hardware that I'm currently writing libomron for, I've been relying on people to send me USB logs for the devices. These logs have now been added to the repository, and are available at:
+
+http://github.com/qdot/libomron/tree/master/doc/logs:"http://github.com/qdot/libomron/tree/master/doc/logs"
+
+The logs for the HEM-790IT blood pressure monitor were produced using http://www.usblyzer.com/:"USBLyzer". The HJ-720IT pedometer logs were produced using http://sourceforge.net/projects/usbsnoop/:"SnoopyPro". I've included the binary log files for these programs, as well as html or xml output of the raw USB, and CSV output from the Omron Health Management software. This is all the information I've needed so far to piece the protocols back together.
+
+The omron protocol document is at
+
+http://docs.nonpolynomial.com/libomron/devel/asciidoc/omron_protocol_notes.html:"http://docs.nonpolynomial.com/libomron/devel/asciidoc/omron_protocol_notes.html"
+
+This documents is being updated as it is checked into the git repository.
+
+Thanks to Noah Kim and Kato for emailing me logs so I can continue work on this project while simultaniously being cheap.
