@@ -1,0 +1,5 @@
+new2,,
+
+Date,Time,SYS (mmHg),DIA (mmHg),Pulse (Pulses/min),Irregular Heartbeat (y or n),Excessive Movement (y or n),Memo (y or n),MsCnt1,MsCnt2,MsCnt3,InputType,MeasureType,Comment
+1/01/2007,12:06:38 AM,123,78,87,n,n,n,0,0,0,0,2,
+1/02/2007,12:08:38 AM,120,73,67,n,n,n,0,0,0,0,2,
