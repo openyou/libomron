@@ -298,7 +298,7 @@ int omron_set_mode(omron_device* dev, omron_mode mode)
 	}
 	return 0;
 }
-int omron_read_data(omron_device* dev)
+int omron_read_data(omron_device* dev, unsigned char *input_report)
 {
 	int Result;
 	char read[9];
@@ -308,16 +308,16 @@ int omron_read_data(omron_device* dev)
 		 Capabilities.InputReportByteLength,
 		 &NumberOfBytesRead,
 		 NULL);
-	memcpy(dev->input_report, read+1, 8);
+	memcpy(input_report, read+1, 8);
 	return Result;
 }
 
-int omron_write_data(omron_device* dev)
+int omron_write_data(omron_device* dev, unsigned char *output_report)
 {
 	int Result;
 	char command[9];
 	command[0] = 0x0;
-	memcpy((command+1), dev->output_report, 8);
+	memcpy((command+1), output_report, 8);
 	Result = WriteFile
 		(dev->device,
 		 command,
