@@ -12,12 +12,14 @@
  */
 
 #include "omron.h"
+#include <string.h>
 #include <stdio.h>
 
-int omron_send_command(omron_device* dev, int size, char* buf)
+int omron_send_command(omron_device* dev, int size, const unsigned char* buf)
 {
 	int total_write_size = 0;
-	int current_write_size = 0; (size > 7 ? 7 : size);
+	int current_write_size;
+
 	while(total_write_size < size)
 	{
 		current_write_size = size - total_write_size;
@@ -32,32 +34,24 @@ int omron_send_command(omron_device* dev, int size, char* buf)
 
 int omron_check_success(omron_device* dev)
 {
-	if(dev->input_report[1] == 'O' && dev->input_report[2] == 'K')
-	{
-		return 0;
-	}
-	return -1;
+	return (dev->input_report[1] == 'O' && dev->input_report[2] == 'K')
+		? 0 : -1;
 }
 
 int omron_send_clear(omron_device* dev)
 {
-	char zero[23] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-					 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-					 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-					 0x00, 0x00};
-	while(1)
-	{
+	static const unsigned char zero[23]; /* = all zeroes */
+
+	do {
 		omron_send_command(dev, 23, zero);
 		omron_read_data(dev);
-		if(omron_check_success(dev) == 0)
-		{
-			break;
-		}
-	}
+
+	} while (omron_check_success(dev) != 0);
+
 	return 0;
 }
 
-int omron_get_command_return(omron_device* dev, int size, char* data)
+int omron_get_command_return(omron_device* dev, int size, unsigned char* data)
 {
 	int total_read_size = 0;
 	int current_read_size = 0;
@@ -98,43 +92,46 @@ int omron_check_mode(omron_device* dev, omron_mode mode)
 	return ret;
 }
 
-//platform independant functions
-int omron_get_device_version(omron_device* dev, char* data)
+static void
+omron_dev_info_command(omron_device* dev,
+		       const char *cmd,
+		       unsigned char *result,
+		       int result_max_len)
 {
-	//command "VER00"
-	char command[5] = {0x56, 0x45, 0x52, 0x30, 0x30};
 	omron_check_mode(dev, DEVICE_INFO_MODE);
-	omron_send_command(dev, 5, command);
-	omron_get_command_return(dev, 12, data);
+	omron_send_command(dev, strlen(cmd),
+			   (const unsigned char*) cmd);
+	omron_get_command_return(dev, result_max_len, result);
+}
+
+
+//platform independant functions
+int omron_get_device_version(omron_device* dev, unsigned char* data)
+{
+	omron_dev_info_command(dev, "VER00", data, 12);
 	data[12] = 0;
 	return 0;
 }
 
-int omron_get_device_prf(omron_device* dev, char* data)
+int omron_get_device_prf(omron_device* dev, unsigned char* data)
 {
-	//command "PRF00"
-	char command[5] = {0x50, 0x52, 0x46, 0x30, 0x30};
-	omron_check_mode(dev, DEVICE_INFO_MODE);
-	omron_send_command(dev, 5, command);
-	omron_get_command_return(dev, 10, data);
+	omron_dev_info_command(dev, "PRF00", data, 10);
 	return 0;
 }
 
-int omron_get_device_serial(omron_device* dev, char* data)
+int omron_get_device_serial(omron_device* dev, unsigned char* data)
 {
-	//command "SRL00"
-	char command[5] = {0x53, 0x52, 0x4c, 0x30, 0x30};
-	omron_check_mode(dev, DEVICE_INFO_MODE);
-	omron_send_command(dev, 5, command);
-	omron_get_command_return(dev, 8, data);
+	omron_dev_info_command(dev, "SRL00", data, 8);
 	return 0;
 }
 
 //daily data information
 int omron_get_daily_data_count(omron_device* dev, unsigned char bank)
 {
-	char data[5];
-	char command[8] = {0x47, 0x44, 0x43, 0x00, 0x00, 0x00, 0x00, bank};
+	unsigned char data[5];
+	unsigned char command[8] =
+		{ 'G', 'D', 'C', 0x00, 0x00, 0x00, 0x00, bank };
+
 	omron_check_mode(dev, DAILY_INFO_MODE);
 	omron_send_command(dev, 8, command);
 	omron_get_command_return(dev, 5, data);
@@ -148,19 +145,34 @@ omron_bp_day_info* omron_get_all_daily_bp_data(omron_device* dev, int* count)
 	return 0;
 }
 
+static void hexdump(void *data, int n_bytes)
+{
+	while (n_bytes--) {
+		printf(" %02x", *(unsigned char*) data);
+		data++;
+	}
+}
+
+static void omron_exchange_cmd(omron_device *dev,
+			       int cmd_len,
+			       const unsigned char *cmd,
+			       int response_len,
+			       unsigned char *response)
+{
+	//Commands fail sometimes. Loop until it works.
+	do {
+		omron_send_command(dev, cmd_len, cmd);
+	} while (omron_get_command_return(dev, response_len, response) < 0);
+}
+
 omron_bp_day_info omron_get_daily_bp_data(omron_device* dev, int index)
 {
 	omron_bp_day_info r;
-	int t = -1;
-	char data[17];
-	char command[8] = {0x47, 0x4d, 0x45, 0x00, 0x00, 0x00, index, index};
+	unsigned char data[17];
+	unsigned char command[8] = {'G', 'M', 'E', 0x00, 0x00, 0x00, index, index};
 	omron_check_mode(dev, DAILY_INFO_MODE);
-	//This fails sometimes. Loop until it works.
-	while(t < 0)
-	{
-		omron_send_command(dev, 8, command);
-		t = omron_get_command_return(dev, 14, data);
-	}
+	omron_exchange_cmd(dev, 8, command, 14, data);
+
 	r.year = data[0];
 	r.month = data[1];
 	r.day = data[2];
@@ -181,9 +193,30 @@ omron_bp_week_info* omron_get_all_weekly_bp_data(omron_device* dev, int* count)
 	return 0;
 }
 
-omron_bp_week_info omron_get_weekly_bp_data(omron_device* dev, int index)
+omron_bp_week_info omron_get_weekly_bp_data(omron_device* dev, int index, int evening)
 {
 	omron_bp_week_info r;
+	unsigned char data[12];
+	unsigned char command[9] = { 'G',
+				     (evening ? 'E' : 'M'),
+				     'A',
+				     0,
+				     1,
+				     index,
+				     0,
+				     0,
+				     index^1 };
+				     
 	omron_check_mode(dev, DEVICE_INFO_MODE);
+
+	omron_exchange_cmd(dev, 9, command, 9, data);
+
+	printf("Weekly data:");
+	hexdump(data, sizeof(data));
+	printf("\n");
+
+	r.sys = data[6] + 25;
+	r.dia = data[7];
+	r.pulse = data[8];
 	return r;
 }

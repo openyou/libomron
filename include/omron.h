@@ -27,9 +27,9 @@ typedef HANDLE omron_device_impl;
 
 typedef enum
 {
-	NULL_MODE = 0x0000,
+	NULL_MODE	 = 0x0000,
 	DEVICE_INFO_MODE = 0x1111,
-	DAILY_INFO_MODE = 0x74bc,
+	DAILY_INFO_MODE	 = 0x74bc,
 	WEEKLY_INFO_MODE = 0x1074
 } omron_mode;
 
@@ -86,9 +86,9 @@ extern "C" {
 	int omron_write_data(omron_device* dev);
 
 	//platform independant functions
-	int omron_get_device_serial(omron_device* dev, char* data);
-	int omron_get_device_version(omron_device* dev, char* data);
-	int omron_get_device_prf(omron_device* dev, char* data);
+	int omron_get_device_serial(omron_device* dev, unsigned char* data);
+	int omron_get_device_version(omron_device* dev, unsigned char* data);
+	int omron_get_device_prf(omron_device* dev, unsigned char* data);
 
 	//daily data information
 	int omron_get_daily_data_count(omron_device* dev, unsigned char bank);
@@ -97,7 +97,7 @@ extern "C" {
 
 	//weekly data information
 	omron_bp_week_info* omron_get_all_weekly_bp_data(omron_device* dev, int* count);
-	omron_bp_week_info omron_get_weekly_bp_data(omron_device* dev, int index);
+	omron_bp_week_info omron_get_weekly_bp_data(omron_device* dev, int index, int evening);
 
 #ifdef __cplusplus
 }

@@ -64,6 +64,19 @@ int main(int argc, char** argv)
 		printf("Reading on %.2d/%.2d/%.2d %.2d:%.2d:%.2d\nSYS: %d DIA: %d PULSE: %d\n", r.day, r.month, r.year, r.hour, r.minute, r.second, r.sys, r.dia, r.pulse);
 	}
 
+	printf("Weekly info:\n");
+	for(i = 0; i < 8; i++) { /* FIXME: Asking for an index above 7 hangs. Is this a hard limit, or do I have to check for the device replying "No"? */
+	  	omron_bp_week_info w;
+
+		w = omron_get_weekly_bp_data(&test, i, 0);
+		printf("Moring[%d] = sys:%d dia:%d pulse:%d.\n", i, w.sys, w.dia, w.pulse);
+
+		w = omron_get_weekly_bp_data(&test, i, 1);
+		printf("Evening[%d] = sys:%d dia:%d pulse:%d.\n", i, w.sys, w.dia, w.pulse);
+	}
+
+
+
 	ret = omron_close(&test);
 	if(ret < 0)
 	{
