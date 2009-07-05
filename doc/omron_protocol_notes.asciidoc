@@ -18,14 +18,19 @@ The following notation is used in the packet formats in this document
 
 == Protocol Information ==
 
-=== Protocol Format ===
+=== Packet Format ===
 
 The protocol itself does not follow the normal USB HID specification,
 instead catching and using the raw reports with its own format. It
 does this in order to bypass driver installation on Windows based
 machines. 
 
-All output reports are 9 bytes (1 report ID, always 0, 8 data)
+All output reports are 8 bytes with no HID report ID, but some operating
+sytem software (at least under Microsoft Windows) will provide prepend
+a byte that is always 0, to indicate report ID 0, so the report will be
+appear to be 9 bytes (1 report ID, always 0, 8 data).  This is probably
+intended to simplify HID report processing by allowing client software
+to be written as if all HID devices prepend a one byte report ID.
 
 In input and output reports, the first data byte specifies the number
 of "valid" bytes in the packet. Count starts after the count byte, all
@@ -43,19 +48,36 @@ Only bytes 1-5 are used, and would look like this in our notation
 
 0x06 0x07 are ignored and can be anything.
 
-=== Command Status ===
+=== Command Format ===
 
-For commands, the first 3 bytes specify the command. Commands may be
-broken up over multiple output reports
+All commands from the computer to the Omron device consit of at least
+five bytes.  All commands begin with three mnemonic ASCII characters
+(except for the "clearing block" command described below, where these
+bytes are all zero) followed by one or more data bytes (which may or
+may not human readable ASCII, depending on command), followed, by a
+terminating checksum byte which is the XOR of the data bytes.
+Commands may span multiple output reports.
+
+=== Response Format ===
 
 For returns, the first 2-3 bytes specify the status. Returns may be
 broken up over multiple input reports
 
-Successful input reports will have their first three bytes as
+Successful input reports begin with ASCII "OK" and are either exactly two
+bytes or at least five bytes, the last of which is a checksum of the
+bytes after the "OK".
 --------------
-0x4F 0x4B 0x00
+0x4F 0x4B [ 0x00 ... CHECKSUM ]
 (ASCII: "OK")
+(The CHECKSUM byte is the XOR of bytes designateed by "...")
 --------------
+
+An exception to the statement about checksums above is the response to
+the "END" command which is "OFF\r\n" with no checksum byte.  Also a
+response of zero bytes to an "END" command may have been observed
+under Linux, but this may have been a figment of a user level bug.
+
+
 
 Unsuccessful input reports will have their first two bytes as 0x4E 0x4F.
 -------------
@@ -106,6 +128,7 @@ Used to retrieve the version of the unit, in ASCII string format
 ------------------------
 0x56 0x45 0x52 0x30 0x30 
 (ASCII: "VER00")
+(Three byte ASCII command "VER", argument "0", checksum checksum "0")
 ------------------------
 
 ==== Parameters ====
@@ -117,18 +140,21 @@ null terminated, giving the unit version)
 
 ==== Output Report Example ====
 ------------------------
-0x56 0x45 0x52 0x30 0x30 
+0x56 0x45 0x52 0x30 0x30
+(Three byte ASCII command "VER", argument byte ASCII "0", checksum byte ASCII "0")
 ------------------------
 
 ==== Output Report Example in HID Raw Report Format ====
 ---------------------------------------
 0x05 0x56 0x45 0x52 0x30 0x30 0xXX 0xXX
+(Byte count 5, command "VER", argument "0", argument checksum "0")
 ---------------------------------------
 
 ==== Return Example ====
 -----------------------------------------------------------
 0x4d 0x37 0x30 0x38 0x30 0x49 0x54 0x20 0x32 0x30 0x37 0x4a
-(ASCII: 'M7080IT 207J')
+(ASCII: "M7080IT 207J")
+(data bytes: ASCII "M7080IT 207", data checksum: 0x4a )
 ----------------------------------------------------------- 
 
 ==== Return Example in HID Raw Report Format ====
@@ -164,12 +190,14 @@ None
 ==== Output Report Example in HID Raw Report Format ====
 ---------------------------------------
 0x05 0x50 0x52 0x46 0x30 0x30 0xXX 0xXX
+(Byte count 5, ASCII "PRF", data byte "0", data checksum "0")
 ---------------------------------------
 
 ==== Return Example ====
 ------------------------------------------------------
 0x30 0x30 0x31 0x30 0x31 0x30 0x30 0x30 0x30 0x30 0x00
-(ASCII: '00101000')
+(ASCII: '001010000')
+(ASCII data '0010100', data checksum: 0)
 ------------------------------------------------------
 
 ==== Return Example in HID Raw Report Format ====
@@ -227,8 +255,11 @@ Used to retreive how many sessions are currently stored on the machine
 
 ==== Command ====
 ---------------------------------------
-0x47 0x44 0x43 0x00 0x00 0x00 0x00 0x0?
+0x47 0x44 0x43 0x00 bank 0x00 0x00 checksum
 ASCII: "GDC" (Get Data Count?)
+index = 0..(value returned by GDC - 1)
+bank = 0x00, 0x01 or 0x02, perhaps for user A, user B, combined?
+checksum = the XOR of the bytes after "GDC"
 ---------------------------------------
 
 ==== Parameters ====
@@ -268,8 +299,11 @@ Retrieve information about a single reading
 
 ==== Command ====
 ---------------------------------------
-0x47 0x4d 0x45 0x00 0x00 0x00 0x0? 0x0?
+0x47 0x4d 0x45 0x00 bank 0x00 index checksum
 ASCII: "GME" (Get Measurement?)
+index = 0..(value returned by GDC - 1)
+bank = 0x00, 0x01 or 0x02, perhaps for user A, user B, combined?
+checksum = the XOR of the bytes after "GME"
 ---------------------------------------
 
 ==== Parameters ====
@@ -297,7 +331,7 @@ Byte C:: Status Flags
 	 - 0x2X - Second reading of a 3 reading average (TruRead function)
 	 - 0x3X - Third reading of a 3 reading average (TruRead function)
 	 - Others: UNKNOWN
-Byte D:: UNKNOWN
+Byte D:: Checksum (XOR of bytes 0..C)
 
 ==== Output Report Example ====
 Command gets newest available record
@@ -336,15 +370,22 @@ Read Type:: Standalone
 
 == Weekly Average Mode Commands ==
 
-=== Get Weekly Morning Data ===
+=== Get Weekly Morning/Evening Data ===
 
 ==== Description ====
-Retrieve information about a weekly morning average
+Retrieve information about a weekly morning/evening average
 
 ==== Command ====
 --------------------------------------------
-0x47 0x4d 0x41 0x00 0x00 0x0? 0x00 0x00 0x0?
-(ASCII: "GMA" (Get Morning Average))
+0x47 0x4d 0x41 0x00 bank index 0x00 0x00 checksum
+ASCII: "GMA" (Get Morning Average)
+or
+0x47 0x45 0x41 0x00 bank index 0x00 0x00 checksum
+ASCII: "GEA" (Get Evening Average)
+
+index = 0..7?
+bank = 0x00, 0x01 or 0x02, perhaps for user A, user B, combined?
+checksum = the XOR of the bytes after "GMA" or "GEA"
 --------------------------------------------
 
 ==== Parameters ====
@@ -353,16 +394,15 @@ Index of record
 ==== Return Format ====
 12 bytes (3 bytes for "OK" success string, 9 bytes, binary)
 
-Byte 0:: UNKNOWN
-Byte 1:: UNKNOWN
-Byte 2:: UNKNOWN
-Byte 3:: UNKNOWN
-Byte 4:: UNKNOWN
-Byte 5:: UNKNOWN
-Byte 6:: SYS minus 25 (NEED TO CONFIRM - WTF?!)
-Byte 7:: DIA
-Byte 8:: Pulse
-Byte 9:: UNKNOWN
+Byte 0:: UNKNOWN (always 0x80?)
+Byte 1:: UNKNOWN (always 0..7?)
+Byte 2:: Last two digits of year
+Byte 3:: Month
+Byte 4:: Day
+Byte 5:: SYS minus 25 (NEED TO CONFIRM) (0 = no readings this week?)
+Byte 6:: DIA (0 = no readings this week?)
+Byte 7:: Pulse
+Byte 8:: Checksum (XOR of bytes 0..7)
 
 ==== Output Report Example ====
 Command gets 7th record
@@ -382,62 +422,6 @@ Command gets 7th record
 -------------------------------------------- 
 
 SYS:: 138 (0x71 + 0x19, unit says 138 though. This lines up across other readings too)
-DIA:: 105 (0x69)
-Pulse:: 112 (0x70)
-
-==== Return Example in HID Raw Report Format ====
----------------------------------------
-0x07 0x4f 0x4b 0x00 0x80 0x01 0x09 0x04 
-0x05 0x13 0x71 0x69 0x70 0xf7 0xXX 0xXX
----------------------------------------
-
-=== Get Weekly Evening Data ===
-
-==== Description ====
-Retrieve information about a weekly evening average
-
-==== Command ====
---------------------------------------------
-0x47 0x4d 0x45 0x00 0x00 0x0? 0x00 0x00 0x0?
-(ASCII: "GEA" (Get Evening Average))
---------------------------------------------
-
-==== Parameters ====
-Index of record
-
-==== Return Format ====
-12 bytes (3 bytes for "OK" success string, 9 bytes, binary)
-
-Byte 0:: UNKNOWN
-Byte 1:: UNKNOWN
-Byte 2:: UNKNOWN
-Byte 3:: UNKNOWN
-Byte 4:: UNKNOWN
-Byte 5:: UNKNOWN
-Byte 6:: SYS minus 25 (NEED TO CONFIRM)
-Byte 7:: DIA
-Byte 8:: Pulse
-Byte 9:: UNKNOWN
-
-==== Output Report Example ====
-Command gets 7th record
---------------------------------------------
-0x47 0x4d 0x45 0x00 0x00 0x06 0x00 0x00 0x06
---------------------------------------------
-
-==== Output Report Example in HID Raw Report Format ====
----------------------------------------
-0x07 0x47 0x4d 0x45 0x00 0x00 0x00 0x06 
-0x02 0x00 0x06 0x00 0x00 0x00 0x00 0x00
----------------------------------------
-
-==== Return Example ====
---------------------------------------------
-0x80 0x01 0x09 0x04 0x13 0x71 0x69 0x70 0xf7 
---------------------------------------------
-
-SYS:: 138 (0x71 + 0x19, unit says 138 though. This lines up across
-other readings too)
 DIA:: 105 (0x69)
 Pulse:: 112 (0x70)
 
