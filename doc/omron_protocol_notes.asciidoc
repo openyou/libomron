@@ -1,13 +1,15 @@
 Omron 790IT Protocol Documentation
 ==================================
 Kyle Machulis <kyle@nonpolynomial.com>
-v1.0, May 2 2009
+v1.1, July 4 2009
 
 == Introduction ==
 
 This document outlines the USB HID based protocol for the Omron 790IT
 Blood Pressure Monitor. The protocol allows a user to download
 information that was stored on the unit over multiple usages. 
+
+Thanks to Adam Richter for editing and additions to the document.
 
 == Document Notation ==
 
