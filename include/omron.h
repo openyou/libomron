@@ -27,9 +27,9 @@ typedef HANDLE omron_device_impl;
 
 typedef enum
 {
-	NULL_MODE = 0x0000,
+	NULL_MODE	 = 0x0000,
 	DEVICE_INFO_MODE = 0x1111,
-	DAILY_INFO_MODE = 0x74bc,
+	DAILY_INFO_MODE	 = 0x74bc,
 	WEEKLY_INFO_MODE = 0x1074
 } omron_mode;
 
@@ -37,8 +37,6 @@ typedef struct
 {
 	omron_device_impl device;
 	omron_mode device_mode;
-	unsigned char input_report[8];
-	unsigned char output_report[8];
 } omron_device;
 
 typedef struct
@@ -65,11 +63,16 @@ typedef struct
 
 typedef struct
 {
-	unsigned char unknown_1[6];
-	int sys;
-	int dia;
+	int present;
+	unsigned char unknown_1; /* always 0x00 */
+	unsigned char unknown_2; /* always 0x80 */
+	unsigned int year;
+	unsigned int month;
+	unsigned int day;
+	unsigned char unknown_3; /* always 0 */
+	int sys;		 /* always 0? */
+	int dia;		 /* always 0? */
 	int pulse;
-	unsigned char unknown_2[1];
 } omron_bp_week_info;
 
 
@@ -82,22 +85,22 @@ extern "C" {
 	int omron_open(omron_device* dev, int VID, int PID, unsigned int device_index);
 	int omron_close(omron_device* dev);
 	int omron_set_mode(omron_device* dev, omron_mode mode);
-	int omron_read_data(omron_device* dev);
-	int omron_write_data(omron_device* dev);
+	int omron_read_data(omron_device* dev, unsigned char *input_report);
+	int omron_write_data(omron_device* dev, unsigned char *output_report);
 
 	//platform independant functions
-	int omron_get_device_serial(omron_device* dev, char* data);
-	int omron_get_device_version(omron_device* dev, char* data);
-	int omron_get_device_prf(omron_device* dev, char* data);
+	int omron_get_device_serial(omron_device* dev, unsigned char* data);
+	int omron_get_device_version(omron_device* dev, unsigned char* data);
+	int omron_get_device_prf(omron_device* dev, unsigned char* data);
 
 	//daily data information
 	int omron_get_daily_data_count(omron_device* dev, unsigned char bank);
 	omron_bp_day_info* omron_get_all_daily_bp_data(omron_device* dev, int* count);
-	omron_bp_day_info omron_get_daily_bp_data(omron_device* dev, int index);
+	omron_bp_day_info omron_get_daily_bp_data(omron_device* dev, int bank, int index);
 
 	//weekly data information
 	omron_bp_week_info* omron_get_all_weekly_bp_data(omron_device* dev, int* count);
-	omron_bp_week_info omron_get_weekly_bp_data(omron_device* dev, int index);
+	omron_bp_week_info omron_get_weekly_bp_data(omron_device* dev, int bank, int index, int evening);
 
 #ifdef __cplusplus
 }
