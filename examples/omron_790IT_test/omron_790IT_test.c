@@ -47,7 +47,7 @@ int main(int argc, char** argv)
 		printf("Device serial: %s\n", str);
 	}
 
-	ret = omron_get_device_prf(&test, str);
+	ret = omron_get_bp_profile(&test, str);
 	if(ret < 0)
 	{
 		printf("Cannot get device prf!\n");

@@ -15,6 +15,7 @@
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
+#include <math.h>
 
 // #define DEBUG
 
@@ -32,6 +33,28 @@ static void hexdump(void *data, int n_bytes)
 		printf(" %02x", *(unsigned char*) data);
 		data++;
 	}
+	printf("\n");
+}
+
+int assemble_number(unsigned char *data, int start, int length)
+{
+	int ret = 0;
+	int pos = start;
+	int i;
+	for(i = 0; i < length; ++i)
+	{
+		if(!(i % 2))
+		{
+			if(i >= 2)
+				pos++;
+			ret += (data[pos] >> 4) * (pow(10, length - i - 1));
+		}
+		else
+		{
+			ret += (data[pos] & 0x0f) * (pow(10, length - i - 1));
+		}
+	}
+	return ret;
 }
 
 int omron_send_command(omron_device* dev, int size, const unsigned char* buf)
@@ -85,11 +108,15 @@ xor_checksum(unsigned char *data, int len)
 {
 	unsigned char checksum = 0;
 
+	unsigned int begin_len = len;
+	
 	while (len--)
 		checksum ^= *(data++);
 
 	if (checksum)
+	{
 		printf("bad checksum 0x%x\n", checksum);
+	}
 
 	return checksum;
 }
@@ -208,7 +235,7 @@ static void omron_exchange_cmd(omron_device *dev,
 	// Retry command if the response is garbled, but accept "NO" as
 	// a valid response.
 	do {
-		omron_check_mode(dev, mode);
+		//omron_check_mode(dev, mode);
 		omron_send_command(dev, cmd_len, cmd);
 		status = omron_get_command_return(dev, response_len, response);
 		if (status > 0) {
@@ -246,7 +273,7 @@ int omron_get_device_version(omron_device* dev, unsigned char* data)
 	return 0;
 }
 
-int omron_get_device_prf(omron_device* dev, unsigned char* data)
+int omron_get_bp_profile(omron_device* dev, unsigned char* data)
 {
 	omron_dev_info_command(dev, "PRF00", data, 11);
 	return 0;
@@ -350,4 +377,64 @@ omron_bp_week_info omron_get_weekly_bp_data(omron_device* dev, int bank, int ind
 		r.pulse = data[10];
 	}
 	return r;
+}
+
+omron_pd_profile_info omron_get_pd_profile(omron_device* dev)
+{
+	unsigned char data[11];
+	omron_pd_profile_info profile_info;
+	omron_dev_info_command(dev, "PRF00", data, 11);
+	profile_info.weight = assemble_number(data, 2, 4) / 10;
+	profile_info.stride = assemble_number(data, 6, 4) / 10;
+	return profile_info;
+}
+
+omron_pd_count_info omron_get_pd_data_count(omron_device* dev)
+{
+	omron_pd_count_info count_info;
+	unsigned char data[5];
+	omron_dev_info_command(dev, "CNT00", data, 5);
+	count_info.daily_count = assemble_number(data, 0, 4);
+	count_info.hourly_count = assemble_number(data, 2, 4);
+	return count_info;
+}
+
+omron_pd_daily_data omron_get_pd_daily_data(omron_device* dev, int day)
+{
+	omron_pd_daily_data daily_data;
+	unsigned char data[20];
+	unsigned char command[7] =
+		{ 'M', 'E', 'S', 0x00, 0x00, day, 0x00 ^ day};
+
+	// assert(bank < 2);
+	omron_exchange_cmd(dev, DAILY_INFO_MODE, sizeof(command), command,
+			   sizeof(data), data);
+	daily_data.total_steps = assemble_number(data, 3, 5);
+	return daily_data;
+}
+
+omron_pd_hourly_data* omron_get_pd_hourly_data(omron_device* dev, int day)
+{
+	omron_pd_hourly_data* hourly_data = malloc(sizeof(omron_pd_hourly_data) * 24);
+	unsigned char data[37];
+
+	// assert(bank < 2);
+	int i, j;
+	for(i = 0; i < 3; ++i)
+	{
+		unsigned char command[8] =
+			{ 'G', 'T', 'D', 0x00, 0, day, i + 1, day ^ (i + 1)};
+		omron_exchange_cmd(dev, DAILY_INFO_MODE, sizeof(command), command,
+						   sizeof(data), data);
+		for(j = 0; j <= 7; ++j)
+		{
+			int offset = j * 4 + 4;
+			int hour = (i * 8) + j;
+			hourly_data[hour].is_attached = (data[(offset)] & (1 << 6)) > 0;
+			hourly_data[hour].regular_steps = ((data[(offset)] & (~0xc0)) << 8) | (data[(offset) + 1]);
+			hourly_data[hour].aerobic_steps = ((data[(offset) + 2] & (~0xc0)) << 8) | (data[(offset) + 3]);
+
+		}
+	}
+	return hourly_data;
 }
