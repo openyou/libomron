@@ -4,11 +4,6 @@
 
 SET(SRCS omron_790IT_test.c)
 
-SET(LIBS omron hid setupapi)
-
-INCLUDE_DIRECTORIES(${LIBOMRON_INCLUDE_DIRS})
-LINK_DIRECTORIES(../../lib)
-
 BUILDSYS_BUILD_EXE(
   NAME omron_790IT_test
   SOURCES "${SRCS}" 
