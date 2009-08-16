@@ -22,9 +22,11 @@
 #ifdef USE_LIBHID
 #include <hid.h>
 typedef HIDInterface* omron_device_impl;
-#else
+#elif WIN32
 #include <windows.h>
 typedef HANDLE omron_device_impl;
+#else
+typedef int omron_device_impl;
 #endif
 
 typedef enum
