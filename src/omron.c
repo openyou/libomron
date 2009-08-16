@@ -36,7 +36,7 @@ static void hexdump(void *data, int n_bytes)
 	printf("\n");
 }
 
-int assemble_number(unsigned char *data, int start, int length)
+int bcd_to_int(unsigned char *data, int start, int length)
 {
 	int ret = 0;
 	int pos = start;
@@ -56,6 +56,12 @@ int assemble_number(unsigned char *data, int start, int length)
 	}
 	return ret;
 }
+
+short short_to_bcd(int number)
+{
+	return ((number/10) << 4) | (number % 10);
+}
+
 
 int omron_send_command(omron_device* dev, int size, const unsigned char* buf)
 {
@@ -90,15 +96,16 @@ int omron_check_success(unsigned char *input_report)
 
 int omron_send_clear(omron_device* dev)
 {
-	static const unsigned char zero[23]; /* = all zeroes */
-	unsigned char input_report[9];
+	//static const unsigned char zero[23]; /* = all zeroes */
+	static const unsigned char zero[12]; /* = all zeroes */
+	//unsigned char input_report[9];
+	unsigned char input_report[8];
 	int read_result;
-
+	read_result = omron_read_data(dev, input_report);
 	do {
-		omron_send_command(dev, 23, zero);
+		omron_send_command(dev, sizeof(zero), zero);
 		read_result = omron_read_data(dev, input_report);
-
-	} while (read_result < 2 || omron_check_success(input_report) != 0);
+	} while (omron_check_success(input_report) != 0);
 
 	return 0;
 }
@@ -203,7 +210,7 @@ int omron_check_mode(omron_device* dev, omron_mode mode)
 {
 	int ret;
 
-#if 0
+//#if 0
 	/*
 	  At least under Linux usbfs, I get inconsistent results from
 	  reading data if I uncomment this optimization.  Perhaps
@@ -212,7 +219,7 @@ int omron_check_mode(omron_device* dev, omron_mode mode)
 	*/
 	if(dev->device_mode == mode)
 		return 0;
-#endif
+//#endif
 
 	ret = omron_set_mode(dev, mode);
 	if(ret == 0)
@@ -235,7 +242,7 @@ static void omron_exchange_cmd(omron_device *dev,
 	// Retry command if the response is garbled, but accept "NO" as
 	// a valid response.
 	do {
-		//omron_check_mode(dev, mode);
+		omron_check_mode(dev, mode);
 		omron_send_command(dev, cmd_len, cmd);
 		status = omron_get_command_return(dev, response_len, response);
 		if (status > 0) {
@@ -258,7 +265,7 @@ omron_dev_info_command(omron_device* dev,
 {
 	unsigned char tmp[result_max_len+3];
 
-	omron_exchange_cmd(dev, DEVICE_INFO_MODE, strlen(cmd),
+	omron_exchange_cmd(dev, PEDOMETER_MODE, strlen(cmd),
 			   (const unsigned char*) cmd,
 			   result_max_len+3, tmp);
 
@@ -384,8 +391,8 @@ omron_pd_profile_info omron_get_pd_profile(omron_device* dev)
 	unsigned char data[11];
 	omron_pd_profile_info profile_info;
 	omron_dev_info_command(dev, "PRF00", data, 11);
-	profile_info.weight = assemble_number(data, 2, 4) / 10;
-	profile_info.stride = assemble_number(data, 6, 4) / 10;
+	profile_info.weight = bcd_to_int(data, 2, 4) / 10;
+	profile_info.stride = bcd_to_int(data, 6, 4) / 10;
 	return profile_info;
 }
 
@@ -394,8 +401,8 @@ omron_pd_count_info omron_get_pd_data_count(omron_device* dev)
 	omron_pd_count_info count_info;
 	unsigned char data[5];
 	omron_dev_info_command(dev, "CNT00", data, 5);
-	count_info.daily_count = assemble_number(data, 0, 4);
-	count_info.hourly_count = assemble_number(data, 2, 4);
+	count_info.daily_count = bcd_to_int(data, 0, 4);
+	count_info.hourly_count = bcd_to_int(data, 2, 4);
 	return count_info;
 }
 
@@ -404,12 +411,12 @@ omron_pd_daily_data omron_get_pd_daily_data(omron_device* dev, int day)
 	omron_pd_daily_data daily_data;
 	unsigned char data[20];
 	unsigned char command[7] =
-		{ 'M', 'E', 'S', 0x00, 0x00, day, 0x00 ^ day};
+		{ 'M', 'E', 'S', 0x00, 0x00, short_to_bcd(day), 0x00 ^ short_to_bcd(day)};
 
 	// assert(bank < 2);
-	omron_exchange_cmd(dev, DAILY_INFO_MODE, sizeof(command), command,
+	omron_exchange_cmd(dev, PEDOMETER_MODE, sizeof(command), command,
 			   sizeof(data), data);
-	daily_data.total_steps = assemble_number(data, 3, 5);
+	daily_data.total_steps = bcd_to_int(data, 3, 5);
 	return daily_data;
 }
 
@@ -423,8 +430,8 @@ omron_pd_hourly_data* omron_get_pd_hourly_data(omron_device* dev, int day)
 	for(i = 0; i < 3; ++i)
 	{
 		unsigned char command[8] =
-			{ 'G', 'T', 'D', 0x00, 0, day, i + 1, day ^ (i + 1)};
-		omron_exchange_cmd(dev, DAILY_INFO_MODE, sizeof(command), command,
+			{ 'G', 'T', 'D', 0x00, 0, short_to_bcd(day), i + 1, short_to_bcd(day) ^ (i + 1)};
+		omron_exchange_cmd(dev, PEDOMETER_MODE, sizeof(command), command,
 						   sizeof(data), data);
 		for(j = 0; j <= 7; ++j)
 		{

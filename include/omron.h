@@ -32,7 +32,8 @@ typedef enum
 	NULL_MODE	 = 0x0000,
 	DEVICE_INFO_MODE = 0x1111,
 	DAILY_INFO_MODE	 = 0x74bc,
-	WEEKLY_INFO_MODE = 0x1074
+	WEEKLY_INFO_MODE = 0x1074,
+	PEDOMETER_MODE = 0x0102
 } omron_mode;
 
 typedef struct
