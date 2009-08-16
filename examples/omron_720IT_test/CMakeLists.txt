@@ -4,7 +4,11 @@
 
 SET(SRCS omron_720IT_test.c)
 
-SET(LIBS /Users/qdot/git-projects/libomron/build_windows_mingw4_x86_release_static//lib/libomron.a hid setupapi)
+SET(LIBS ${LIBOMRON_LIBRARY})
+
+IF(WIN32)
+  LIST(APPEND LIBS hid setupapi)
+ENDIF(WIN32)
 
 INCLUDE_DIRECTORIES(${LIBOMRON_INCLUDE_DIRS})
 LINK_DIRECTORIES(../../lib)
