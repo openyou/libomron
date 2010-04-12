@@ -11,13 +11,14 @@
  * Read LICENSE_BSD.txt for details.
  */
 
-#include "omron.h"
+#include "libomron/omron.h"
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 
-// #define DEBUG
+#define DEBUG
 
 #ifdef DEBUG
 #define IF_DEBUG(x)	do { x; } while (0)
@@ -83,9 +84,10 @@ int omron_send_command(omron_device* dev, int size, const unsigned char* buf)
 		memcpy(output_report + 1, buf+total_write_size,
 		       current_write_size);
 
-		omron_write_data(dev, output_report);
+		printf("return! %d\n", omron_write_data(dev, output_report));
 		total_write_size += current_write_size;
 	}
+
 	return 0;
 }
 
@@ -105,6 +107,7 @@ int omron_send_clear(omron_device* dev)
 	do {
 		omron_send_command(dev, sizeof(zero), zero);
 		read_result = omron_read_data(dev, input_report);
+		printf("Result size: %d\n", read_result);
 	} while (omron_check_success(input_report) != 0);
 
 	return 0;
@@ -222,10 +225,16 @@ int omron_check_mode(omron_device* dev, omron_mode mode)
 //#endif
 
 	ret = omron_set_mode(dev, mode);
-	if(ret == 0)
+	if(ret > 0)
 	{
 		dev->device_mode = mode;
 		omron_send_clear(dev);
+		return 0;
+	}
+	else
+	{
+		fprintf(stderr, "omron_exchange_cmd: I/O error, status=%d\n",
+			ret);		
 	}
 	return ret;
 }
