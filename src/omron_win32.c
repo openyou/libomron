@@ -1,11 +1,11 @@
 /*
- * Generic function file for Omron Health User Space Driver
+ * Generic function file for Omron Health User Space Driver - Windows DDK version (Will not work with WDK)
  *
- * Copyright (c) 2007-2009 Kyle Machulis/Nonpolynomial Labs <kyle@nonpolynomial.com>
+ * Copyright (c) 2009-2010 Kyle Machulis/Nonpolynomial Labs <kyle@nonpolynomial.com>
  *
  * More info on Nonpolynomial Labs @ http://www.nonpolynomial.com
  *
- * Sourceforge project @ http://www.github.com/qdot/libomron/
+ * Source code available at http://www.github.com/qdot/libomron/
  *
  * This library is covered by the BSD License
  * Read LICENSE_BSD.txt for details.
