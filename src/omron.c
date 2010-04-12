@@ -18,7 +18,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define DEBUG
+//#define DEBUG
 
 #ifdef DEBUG
 #define IF_DEBUG(x)	do { x; } while (0)
@@ -84,7 +84,7 @@ int omron_send_command(omron_device* dev, int size, const unsigned char* buf)
 		memcpy(output_report + 1, buf+total_write_size,
 		       current_write_size);
 
-		printf("return! %d\n", omron_write_data(dev, output_report));
+		omron_write_data(dev, output_report);
 		total_write_size += current_write_size;
 	}
 
