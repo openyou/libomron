@@ -23,7 +23,7 @@ int main(int argc, char** argv)
 
 	test = omron_create();
 	
-	ret = omron_get_count(test, OMRON_790IT_VID, OMRON_790IT_PID);
+	ret = omron_get_count(test, OMRON_VID, OMRON_PID);
 
 	if(!ret)
 	{
@@ -32,7 +32,7 @@ int main(int argc, char** argv)
 	}
 	printf("Found %d omron 790ITs\n", ret);
 
-	ret = omron_open(test, OMRON_790IT_VID, OMRON_790IT_PID, 0);
+	ret = omron_open(test, OMRON_VID, OMRON_PID, 0);
 	if(ret < 0)
 	{
 		printf("Cannot open omron 790IT!\n");

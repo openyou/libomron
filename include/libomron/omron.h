@@ -1,7 +1,7 @@
 /*
  * Declaration file for Omron Health User Space Driver
  *
- * Copyright (c) 2007-2009 Kyle Machulis/Nonpolynomial Labs <kyle@nonpolynomial.com>
+ * Copyright (c) 2009-2010 Kyle Machulis <kyle@nonpolynomial.com>
  *
  * More info on Nonpolynomial Labs @ http://www.nonpolynomial.com
  *
@@ -14,111 +14,196 @@
 #ifndef LIBOMRON_H
 #define LIBOMRON_H
 
-#define OMRON_790IT_VID 0x0590
-#define OMRON_790IT_PID 0x0028
-#define OMRON_720IT_VID 0x0590
-#define OMRON_720IT_PID 0x0028
-#define OMRON_OUT_ENDPT	0x02
-#define OMRON_IN_ENDPT  0x81
+/*******************************************************************************
+ *
+ * Headers
+ * 
+ ******************************************************************************/
 
-
-// #ifdef USE_LIBHID
-// #include <hid.h>
-// typedef HIDInterface* omron_device_impl;
-// #elif WIN32
-// #include <windows.h>
-// typedef HANDLE omron_device_impl;
-// #else
+#if defined(WIN32)
+#include <windows.h>
+typedef HANDLE omron_device_impl;
+#else
 #include <stdint.h>
 #include "nputil/nputil_libusb1.h"
 typedef nputil_libusb1_struct* omron_device_impl;
-// #endif
+#endif
 
+/*******************************************************************************
+ *
+ * Const global values
+ * 
+ ******************************************************************************/
+
+/// Vendor ID for all omron health devices
+const static uint32_t OMRON_VID = 0x0590;
+/// Product ID for all omron health devices
+const static uint32_t OMRON_PID = 0x0028;
+
+/// Out endpoint for all omron health devices
+const static uint32_t OMRON_OUT_ENDPT = 0x02;
+/// In endpoint for all omron health devices
+const static uint32_t OMRON_IN_ENDPT  = 0x81;
+
+/*******************************************************************************
+ *
+ * Omron device enumerations
+ * 
+ ******************************************************************************/
+
+/**
+ * Enumeration for different omron device modes
+ *
+ * These modes dictate what we're currently trying to do with the
+ * omron device. We send a control message with the mode, then
+ * do things like get device info (serial number, version, etc...),
+ * or engage in specific device communication events, like reading
+ * pedometer or blood pressure data
+ */
 typedef enum
 {
-	NULL_MODE	 = 0x0000,
-	DEVICE_INFO_MODE = 0x1111,
-	DAILY_INFO_MODE	 = 0x74bc,
-	WEEKLY_INFO_MODE = 0x1074,
-	PEDOMETER_MODE = 0x0102
+	NULL_MODE			= 0x0000, /// Clearing modes and startup/shutdown
+	DEVICE_INFO_MODE	= 0x1111, /// Getting serial numbers, version, etc...
+	DAILY_INFO_MODE		= 0x74bc, /// Daily blood pressure info mode
+	WEEKLY_INFO_MODE	= 0x1074, /// Weekly blood pressure info mode
+	PEDOMETER_MODE		= 0x0102  /// Pedometer info mode
 } omron_mode;
 
+/**
+ * Enumeration of device state
+ *
+ * Keeps the state of the device, and the current mode that it's in. If
+ * we issue a command that needs a different mode, we can use the state
+ * stored here to check that.
+ */
 typedef struct
 {
-	omron_device_impl device;
-	omron_mode device_mode;
+	omron_device_impl device;	/// Device implementation
+	omron_mode device_mode;		/// Mode the device is currently in
 } omron_device;
 
+/**
+ * Enumeration of device information
+ *
+ * Stores information about the device version, serial, etc...
+ */
 typedef struct
 {
-	uint8_t version[13];
-	uint8_t prf[11];
-	uint8_t srl[8];
+	uint8_t version[13];		/// Version of the device
+	uint8_t prf[11];			/// Can't remember what this is
+	uint8_t srl[8];				/// Serial number of the device
 } omron_device_info;
 
+/*******************************************************************************
+ *
+ * Blood pressure monitor specific enumerations
+ * 
+ ******************************************************************************/
+
+/**
+ * Enumeration for daily blood pressure info
+ *
+ * Stores information taken on a daily basis for blood pressure
+ * Usually, we consider there to be one morning and one evening
+ * reading.
+ */
 typedef struct
 {
-	uint32_t day;
-	uint32_t month;
-	uint32_t year;
-	uint32_t hour;
-	uint32_t minute;
-	uint32_t second;
-	uint8_t unknown_1[2];
-	uint32_t sys;
-	uint32_t dia;
-	uint32_t pulse;
-	uint8_t unknown_2[3];
+	uint32_t day;				/// Day of reading
+	uint32_t month;				/// Month of reading
+	uint32_t year;				/// Year of reading
+	uint32_t hour;				/// Hour of reading
+	uint32_t minute;			/// Minute of reading
+	uint32_t second;			/// Second of reading
+	uint8_t unknown_1[2];		/// No idea
+	uint32_t sys;				/// SYS reading
+	uint32_t dia;				/// DIA reading
+	uint32_t pulse;				/// Pulse reading
+	uint8_t unknown_2[3];		/// No idea
 } omron_bp_day_info;
 
+/**
+ * Enumeration for weekly blood pressure info
+ *
+ * Stores information averages for a week
+ */
 typedef struct
 {
-	int32_t present;
-	uint8_t unknown_1; // always 0x00
-	uint8_t unknown_2; // always 0x80
-	uint32_t year;
-	uint32_t month;
-	uint32_t day;
-	uint8_t unknown_3; // always 0 
-	int32_t sys;		 // always 0?
-	int32_t dia;		 // always 0?
-	int32_t pulse;
+	int32_t present;	/// ???
+	uint8_t unknown_1;	/// always 0x00
+	uint8_t unknown_2;	/// always 0x80
+	uint32_t year;		/// Year of reading
+	uint32_t month;		/// Month of reading
+	uint32_t day;		/// Day that weekly average starts on
+	uint8_t unknown_3;	/// always 0 
+	int32_t sys;		/// SYS average for week
+	int32_t dia;		/// DIA average for week
+	int32_t pulse;		/// Pulse average for week
 } omron_bp_week_info;
 
+
+/*******************************************************************************
+ *
+ * Pedometer specific enumerations
+ * 
+ ******************************************************************************/
+
+/**
+ * Enumeration for pedometer profile information
+ *
+ * Stores information about user (weight, stride length, etc...)
+ */
 typedef struct
 {
-	uint8_t unknown_1[2];
-	uint32_t weight; // lbs times 10? i.e. 190 = {0x01, 0x90} off the device
-	uint32_t stride; // kg times 10? same as last
-	uint8_t unknown_2[2];
+	uint8_t unknown_1[2];		/// ???
+	uint32_t weight;			/// lbs times 10? i.e. 190 = {0x01, 0x90} off the device
+	uint32_t stride;			/// kg times 10? same as last
+	uint8_t unknown_2[2];		/// ???
 } omron_pd_profile_info;
 
+/**
+ * Enumeration for count of valid pedometer information packets
+ *
+ * Contains the number of valid daily and hourly packets, for use by
+ * programs for reading information off the device
+ */
 typedef struct
 {
-	int32_t daily_count;
-	int32_t hourly_count;
-	uint8_t unknown_1;
+	int32_t daily_count;		/// Number of valid daily packets
+	int32_t hourly_count;		/// Number of valid hourly packets
+	uint8_t unknown_1;			/// No idea.
 } omron_pd_count_info;
 
+/**
+ * Enumeration for daily data packets from pedometer
+ *
+ * Daily information from pedometer, including steps, distance, etc...
+ * 
+ */
 typedef struct
 {
-	int32_t total_steps;
-	int32_t total_aerobic_steps;
-	int32_t total_walking_time;
-	int32_t total_calories;
-	float total_distance;
-	float total_fat_burn;
-	int32_t day_serial;
-	uint8_t unknown_1;
+	int32_t total_steps;				/// Total number of steps for the day
+	int32_t total_aerobic_steps;		/// Total number of "aerobic" steps for the day
+	int32_t total_walking_time;			/// Total time spent walking throughout the day (in minutes)
+	int32_t total_calories;				/// Total calories burned
+	float total_distance;				/// Total distance (steps * stride)
+	float total_fat_burn;				/// Total fat burned
+	int32_t day_serial;					/// Offset of date from current day
+	uint8_t unknown_1;					/// No idea
 } omron_pd_daily_data;
 
+/**
+ * Enumeration for hourly data packets from pedometer
+ *
+ * Hourly information about steps taken during a certain day
+ */
 typedef struct
 {
-	int32_t day_serial;
-	int32_t hour_serial;
-	uint8_t is_attached;
-	int32_t regular_steps;
-	int32_t aerobic_steps;
+	int32_t day_serial;			/// Offset of day from current day
+	int32_t hour_serial;		/// Index of hour
+	uint8_t is_attached;		/// Was anything happening for the pedometer to record?
+	int32_t regular_steps;		/// Regular steps taken
+	int32_t aerobic_steps;		/// Aerobic steps taken
 } omron_pd_hourly_data;
    
 
@@ -126,16 +211,97 @@ typedef struct
 extern "C" {
 #endif
 
-	//platform specific functions
+	////////////////////////////////////////////////////////////////////////////////////
+	//
+	// Platform Specific Functions
+	//
+	////////////////////////////////////////////////////////////////////////////////////
+
+	/** 
+	 * Returns the number of devices connected, though does not specify device type
+	 * 
+	 * @param dev Device pointer
+	 * @param VID Vendor ID, defaults to 0x0590
+	 * @param PID Product ID, defaults to 0x0028
+	 * 
+	 * @return Number of devices connected, or < 0 if error
+	 */	
 	int omron_get_count(omron_device* dev, int VID, int PID);
+
+	/** 
+	 * Returns the number of devices connected, though does not specify device type
+	 * 
+	 * @param dev Device pointer
+	 * @param device_index Index of the device to open
+	 * @param VID Vendor ID, defaults to 0x0590
+	 * @param PID Product ID, defaults to 0x0028
+	 * 
+	 * @return > 0 if ok, otherwise < 0
+	 */	
 	int omron_open(omron_device* dev, int VID, int PID, uint32_t device_index);
+	/** 
+	 * Closes an open omron device
+	 * 
+	 * @param dev Device pointer to close
+	 * 
+	 * @return > 0 if ok, otherwise < 0
+	 */
 	int omron_close(omron_device* dev);
+
+	/** 
+	 * Sends the control message to set a new mode for the device
+	 * 
+	 * @param dev Device pointer to set mode for
+	 * @param mode Mode enumeration value, from omron_mode enum
+	 * 
+	 * @return > 0 if ok, otherwise < 0
+	 */
 	int omron_set_mode(omron_device* dev, omron_mode mode);
+
+	/** 
+	 * Reads data from the device
+	 * 
+	 * @param dev Device pointer to read from
+	 * @param input_report Buffer to read into (always 8 bytes)
+	 *
+	 * @return > 0 if ok, otherwise < 0
+	 */
 	int omron_read_data(omron_device* dev, uint8_t *input_report);
+
+	/** 
+	 * Writes data to the device
+	 * 
+	 * @param dev Device pointer to write to
+	 * @param input_report Buffer to read from (always 8 bytes)
+	 *
+	 * @return > 0 if ok, otherwise < 0
+	 */
 	int omron_write_data(omron_device* dev, uint8_t *output_report);
 
-	//platform independant functions
+	////////////////////////////////////////////////////////////////////////////////////
+	//
+	// Device Information Retrieval Functions
+	//
+	////////////////////////////////////////////////////////////////////////////////////
+
+	/** 
+	 * Retrieves the serial number of the device
+	 * 
+	 * @param dev Device to get serial number from
+	 * @param data 8 byte buffer to read serial number into
+	 * 
+	 * @return > 0 if ok, otherwise < 0
+	 */
 	int omron_get_device_serial(omron_device* dev, uint8_t* data);
+
+	/** 
+	 * Retrieves the version number of the device
+	 * 
+	 * @param dev Device to get version number from
+	 * @param data 8 byte buffer to read version number into
+	 * 
+	 * @return > 0 if ok, otherwise < 0
+	 */
 	int omron_get_device_version(omron_device* dev, uint8_t* data);
 
 	////////////////////////////////////////////////////////////////////////////////////
@@ -143,16 +309,58 @@ extern "C" {
 	// Blood Pressure Functions
 	//
 	////////////////////////////////////////////////////////////////////////////////////
-	
+
+	/** 
+	 * Get profile information for pedometer
+	 * 
+	 * @param dev Device to query
+	 * @param data 11 byte buffer for profile information
+	 * 
+	 * @return 0 if successful, < 0 otherwise
+	 */
 	int omron_get_bp_profile(omron_device* dev, uint8_t* data);
 
-	//daily data information
-	int omron_get_daily_bp_data_count(omron_device* dev, uint8_t bank);
+	/** 
+	 * Get an array of all valid daily data
+	 * 
+	 * @param dev Device to query
+	 * @param count Pointer to int, to store number of packets in array
+	 * 
+	 * @return Array of omron_bp_day_info packets, length identified by count
+	 */
 	omron_bp_day_info* omron_get_all_daily_bp_data(omron_device* dev, int* count);
+
+	/** 
+	 * Gets a specific data index from a specific bank of readings
+	 * 
+	 * @param dev Device to query
+	 * @param bank Bank to query (A or B switch on device)
+	 * @param index Index of packet to query in bank
+	 * 
+	 * @return Data packet with requested information
+	 */
 	omron_bp_day_info omron_get_daily_bp_data(omron_device* dev, int bank, int index);
 
-	//weekly data information
+	/** 
+	 * Get an array of all valid weekly data
+	 * 
+	 * @param dev Device to query
+	 * @param count Pointer to int, to store number of packets in array
+	 * 
+	 * @return Array of omron_bp_week_info packets, length identified by count
+	 */
 	omron_bp_week_info* omron_get_all_weekly_bp_data(omron_device* dev, int* count);
+
+	/** 
+	 * Gets a specfic data index from a specific bank of readings
+	 * 
+	 * @param dev Device to query
+	 * @param bank Bank to query (A or B switch on device)
+	 * @param index Index of packet to query in bank
+	 * @param evening If 0, get morning average, If 1, get evening average.
+	 * 
+	 * @return Data packet with requested information
+	 */
 	omron_bp_week_info omron_get_weekly_bp_data(omron_device* dev, int bank, int index, int evening);
 
 	////////////////////////////////////////////////////////////////////////////////////
@@ -160,14 +368,48 @@ extern "C" {
 	// Pedometer Functions
 	//
 	////////////////////////////////////////////////////////////////////////////////////
-	
+
+	/** 
+	 * Get pedometer profile information
+	 * 
+	 * @param dev Device to query
+	 * 
+	 * @return Struct with weight and stride info
+	 */
 	omron_pd_profile_info omron_get_pd_profile(omron_device* dev);
+
+	/** 
+	 * Query device for number of valid data packets
+	 * 
+	 * @param dev Device to query
+	 * 
+	 * @return Struct with count information
+	 */
 	omron_pd_count_info omron_get_pd_data_count(omron_device* dev);
-	omron_pd_daily_data omron_get_pd_daily_data(omron_device* dev, int day);	
+
+	/** 
+	 * Get data for a specific day index
+	 * 
+	 * @param dev Device to query
+	 * @param day Day index, should be between 0 and info retrieved from omron_get_pd_data_count
+	 * 
+	 * @return Struct with data for day
+	 */
+	omron_pd_daily_data omron_get_pd_daily_data(omron_device* dev, int day);
+
+	/** 
+	 * Get hourly data for a specific day index
+	 * 
+	 * @param dev Device to query
+	 * @param day Day index, should be between 0 and info retrieved from omron_get_pd_data_count
+	 * 
+	 * @return Struct with hourly info for day
+	 */
 	omron_pd_hourly_data* omron_get_pd_hourly_data(omron_device* dev, int day);
+	
 #ifdef __cplusplus
 }
 #endif
 
 
-#endif //LIBLIGHTSTONE_H
+#endif //LIBOMRON_H
