@@ -1,7 +1,7 @@
 /*
  * Generic function file for Omron Health User Space Driver
  *
- * Copyright (c) 2007-2009 Kyle Machulis/Nonpolynomial Labs <kyle@nonpolynomial.com>
+ * Copyright (c) 2009-2010 Kyle Machulis <kyle@nonpolynomial.com>
  *
  * More info on Nonpolynomial Labs @ http://www.nonpolynomial.com
  *
