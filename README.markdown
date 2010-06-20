@@ -1,3 +1,5 @@
+(note: this is bv's fork of the libomron see [README.bv](http://github.com/brettviren/libomron/blob/master/README.bv).  original README follows)
+
 # libomron
 
 by Kyle Machulis
