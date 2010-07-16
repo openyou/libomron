@@ -24,6 +24,8 @@ class Gui(object):
         self.name = name
 
         self.data = None
+        self.processed = None
+        self.use_processed = False
         self.dbfile = dbfile
         if self.dbfile: self.open_file()
 
@@ -35,6 +37,7 @@ class Gui(object):
         menubar.add_command(label="Open", command=self.open_file)
         menubar.add_command(label="Plot", command=self.update_plot)
         menubar.add_command(label="Sync", command=self.sync)
+        menubar.add_command(label="Avg", command=self.average)
 
         #menubar.pack()
 
@@ -70,7 +73,12 @@ class Gui(object):
         if not self.data: 
             print "Can't plot, no data"
             return
-        rows = self.data.all()
+        if self.use_processed:
+            print 'Plotting processed data'
+            rows = self.processed
+        else:
+            print 'Plotting all data'
+            rows = self.data.all()
 
         import matplotlib.ticker as ticker
 
@@ -86,17 +94,50 @@ class Gui(object):
             pulse.append(row[3])
             continue
 
+        self.figure.clear()
         ax = self.figure.add_subplot(111)
         ax.plot(ts, sys, 'k-', ts, dia, 'b-', ts, pulse, 'r')
         ax.xaxis.set_major_formatter(ticker.FuncFormatter(format_date))
         self.figure.autofmt_xdate()
+        self.canvas.show() 
 
         return
 
     def sync(self): 
         print 'sync() not implemented'
         return
+
+    def average(self,window=600):
+        'Respond to Avg button, average nearby data in window (seconds)'
+        rows = self.data.all()
+        new_rows = []
+        count = 0
+        last_time = sys_sum = dia_sum = pulse_sum = 0
+        for row in rows:
+            dt = row[0] - last_time
+            last_time = row[0]
+            if dt > window:     # save accumulated and start new with current
+                if count:       # first time through
+                    new_rows.append((last_time,sys_sum/count,dia_sum/count,pulse_sum/count))
+                count = 1
+                sys_sum = row[1]
+                dia_sum = row[2]
+                pulse_sum = row[3]
+                continue
+            # we are inside window of last data, accumulate
+            count += 1
+            sys_sum += row[1]
+            dia_sum += row[2]
+            pulse_sum += row[3]
+            continue
+        print 'Averaged %d values down to %d'%(len(rows),len(new_rows))
+        self.processed = new_rows
+        self.use_processed = True
+        self.update_plot()
+        return            
+
     pass
+
 
 class Main(object):
     def __init__(self,argv=None):
