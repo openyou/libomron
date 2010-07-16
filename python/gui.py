@@ -24,20 +24,21 @@ class Gui(object):
         self.name = name
 
         self.data = None
-        self.processed = None
-        self.use_processed = False
+        self.use_averaged = False
+        self.use_am_pm = False
         self.dbfile = dbfile
-        if self.dbfile: self.open_file()
+        if self.dbfile: self.cb_open_file()
 
         # frame = tk.Frame(master)
         # frame.pack()
 
         menubar = tk.Menu(master)
         menubar.add_command(label="Quit", command=master.quit)
-        menubar.add_command(label="Open", command=self.open_file)
-        menubar.add_command(label="Plot", command=self.update_plot)
-        menubar.add_command(label="Sync", command=self.sync)
-        menubar.add_command(label="Avg", command=self.average)
+        menubar.add_command(label="Open", command=self.cb_open_file)
+        menubar.add_command(label="Plot", command=self.cb_update_plot)
+        menubar.add_command(label="Sync", command=self.cb_sync)
+        menubar.add_command(label="Avg", command=self.cb_average)
+        menubar.add_command(label="AM/PM", command=self.cb_am_pm)
 
         #menubar.pack()
 
@@ -48,11 +49,19 @@ class Gui(object):
         self.canvas.show() 
         self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1) 
 
-        self.update_plot()
+        self.cb_update_plot()
 
         return
 
-    def open_file(self):
+    def get_data(self):
+        '''Return the current data to plot.  Return a list of tuples.
+        First value in each tuple is the time followed by 3
+        measurements (sys,dia,pulse)'''
+        if self.use_averaged:
+            return self.average()
+        return self.data.all()
+
+    def cb_open_file(self):
         'If given a file, open it, else prompt user'
         import store
         if self.dbfile:
@@ -65,51 +74,72 @@ class Gui(object):
         if not self.dbfile: 
             print 'Canceled'
             return
-        return self.open_file()
+        return self.cb_open_file()
             
-
-    def update_plot(self):
+    def cb_update_plot(self):
         'Update the plot given current parameters'
-        if not self.data: 
-            print "Can't plot, no data"
-            return
-        if self.use_processed:
-            print 'Plotting processed data'
-            rows = self.processed
-        else:
-            print 'Plotting all data'
-            rows = self.data.all()
+        rows = self.get_data()
+        if not rows: return
 
         import matplotlib.ticker as ticker
+        import time
 
         # Convert row based to column based
         ts = list()
         sys = list()
         dia = list()
         pulse = list()
+        if self.use_am_pm:      # these will be pm
+            ts2 = list()
+            sys2 = list()
+            dia2 = list()
+            pulse2 = list()
+            pass
+
+        # sort out data
         for row in rows: 
+            if self.use_am_pm:
+                tt = time.localtime(row[0])
+                hour = tt[3]
+                if hour < 12:
+                    ts.append(row[0])
+                    sys.append(row[1])
+                    dia.append(row[2])
+                    pulse.append(row[3])
+                else:
+                    ts2.append(row[0])
+                    sys2.append(row[1])
+                    dia2.append(row[2])
+                    pulse2.append(row[3])
+                    pass
+                continue
             ts.append(row[0])
             sys.append(row[1])
             dia.append(row[2])
             pulse.append(row[3])
             continue
-
+        
         self.figure.clear()
         ax = self.figure.add_subplot(111)
-        ax.plot(ts, sys, 'k-', ts, dia, 'b-', ts, pulse, 'r')
+        ax.plot(ts, sys, 'k', ts, dia, 'b', ts, pulse, 'r')
+        if self.use_am_pm:
+            ax.plot(ts2, sys2, 'k--', ts2, dia2, 'b--', ts2, pulse2, 'r--')
         ax.xaxis.set_major_formatter(ticker.FuncFormatter(format_date))
         self.figure.autofmt_xdate()
         self.canvas.show() 
 
         return
 
-    def sync(self): 
+    def cb_sync(self): 
         print 'sync() not implemented'
         return
 
-    def average(self,window=600):
+    def average(self,window=600,data=None):
         'Respond to Avg button, average nearby data in window (seconds)'
-        rows = self.data.all()
+        if data is None:
+            rows = self.data.all()
+        else:
+            rows = data
         new_rows = []
         count = 0
         last_time = sys_sum = dia_sum = pulse_sum = 0
@@ -131,10 +161,18 @@ class Gui(object):
             pulse_sum += row[3]
             continue
         print 'Averaged %d values down to %d'%(len(rows),len(new_rows))
-        self.processed = new_rows
-        self.use_processed = True
-        self.update_plot()
-        return            
+        return new_rows
+
+    def cb_average(self):
+        self.use_averaged = not self.use_averaged 
+        self.cb_update_plot()
+        return
+
+    def cb_am_pm(self):
+        'Split 3 data values into 6 am/pm'
+        self.use_am_pm = not self.use_am_pm
+        self.cb_update_plot()
+        return
 
     pass
 
