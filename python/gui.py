@@ -14,6 +14,7 @@ def format_date(x, pos=None):
     return time.strftime('%Y-%m-%d',time.localtime(x))
 
 class Gui(object):
+    'A simple gui for omron'
     def __init__(self,master, name=None, dbfile=None):
         self.master = master
         print name,dbfile
@@ -36,9 +37,10 @@ class Gui(object):
         menubar.add_command(label="Quit", command=master.quit)
         menubar.add_command(label="Open", command=self.cb_open_file)
         menubar.add_command(label="Plot", command=self.cb_update_plot)
-        menubar.add_command(label="Sync", command=self.cb_sync)
+        menubar.add_command(label="Acquire", command=self.cb_acquire)
         menubar.add_command(label="Avg", command=self.cb_average)
         menubar.add_command(label="AM/PM", command=self.cb_am_pm)
+        self.menubar = menubar
 
         #menubar.pack()
 
@@ -130,8 +132,48 @@ class Gui(object):
 
         return
 
-    def cb_sync(self): 
-        print 'sync() not implemented'
+    def cb_acquire(self): 
+        print 'Acquiring data'
+        import omron
+        import store
+
+        o = omron.Omron()
+
+        if o.open(omron.OMRON_790IT_PID, omron.OMRON_790IT_VID) < 0:
+            print 'Failed to open device'
+            return
+
+        ret = o.get_device_version()
+        if not ret: print 'Failed to get device version'
+        else: print 'Opened device version %s'%ret
+
+        ret = o.get_bp_profile()
+        if not ret: print 'Failed to get device profile'
+        else: print 'Opened device with profile: %s'%ret
+
+        data_count = o.get_daily_data_count();
+        print 'Trying to get %d readings'%data_count
+
+        def bad_data(r):
+            return not r.day and not r.month and not r.year and \
+                not r.hour and not r.minute and not r.second and \
+                not r.sys and not r.dia and not r.pulse
+
+        data = []
+        for ind in range(data_count-1,-1,-1):
+            for trial in range(3):
+                r = o.get_daily_bp_data(ind)
+                if bad_data(r): continue
+                break
+            ts = store.ymdhms2seconds(r.year,r.month,r.day,r.hour,r.minute,r.second)
+            print trial, ts,r.sys,r.dia,r.pulse
+
+            if bad_data(r): continue
+
+            self.data.add(ts,r.sys,r.dia,r.pulse)
+            continue
+
+        self.cb_update_plot()
         return
 
     def average(self,window=600,data=None):
@@ -164,12 +206,23 @@ class Gui(object):
         return new_rows
 
     def cb_average(self):
+        'Toggle Avg/All'
+        if self.use_averaged:
+            label = 'Avg'
+        else:
+            label = 'All'
+        self.menubar.entryconfig(5,label=label)
         self.use_averaged = not self.use_averaged 
         self.cb_update_plot()
         return
 
     def cb_am_pm(self):
-        'Split 3 data values into 6 am/pm'
+        'Toggle AM/PM and Combined'
+        if self.use_am_pm:
+            label = 'AM/PM'
+        else:
+            label = 'Full'
+        self.menubar.entryconfig(6,label=label)
         self.use_am_pm = not self.use_am_pm
         self.cb_update_plot()
         return
