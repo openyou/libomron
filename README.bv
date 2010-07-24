@@ -1,5 +1,7 @@
 This is a fork of http://github.com/qdot/libomron I use to play around
 with my 790-IT.  Much thanks to qDot for the original heavy lifting!
+The intention here is to scratch my own itch and feed any useful
+improvements back to qDot.
 
 * Overview
 
@@ -11,7 +13,7 @@ This fork adds:
 
  * Random bug fixes/improvements on the C side
 
-The intention is to feed any useful improvements back to qDot.
+ * A simple Python/TK GUI app.
 
 * Installation
 
@@ -21,9 +23,12 @@ The intention is to feed any useful improvements back to qDot.
 
  * SWIG
 
-** Installation steps
+** Steps for installation, testing and running
 
-This assumes tese locations:
+Things are not as polished as they could be, but here is how to go
+from nothing to something.
+ 
+It assumes these locations:
 
  - git clone to ~/git/libomron
  - build area in ~/opt/omron-build
@@ -71,7 +76,7 @@ that is okay)
 
  ~/opt/omron/usr/local/bin/omron_790IT_test
 
-9) Try try out the python bindings do:
+9) Try out the python bindings do:
 
  export PYTHONPATH=~/opt/omron/usr/local/python
  python ~/opt/omron/usr/local/python/omron/omron_790IT_test.py
@@ -81,4 +86,9 @@ that is okay)
  python ~/opt/omron/usr/local/python/omron/plot.py 
  # (this wlil plot all readouts)
 
+10) Try the GUI app
 
+ # Set PYTHONPATH as above, and print help screen
+ python ~/opt/omron/usr/local/python/omron/gui -h
+ # Run it, point it to a data file, can be same one produced above
+ python ~/opt/omron/usr/local/python/omron/gui -f omron.sqlite3
