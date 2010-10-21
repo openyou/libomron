@@ -283,27 +283,27 @@ omron_dev_info_command(omron_device* dev,
 }
 
 //platform independant functions
-int omron_get_device_version(omron_device* dev, unsigned char* data)
+OMRON_DECLSPEC int omron_get_device_version(omron_device* dev, unsigned char* data)
 {
 	omron_dev_info_command(dev, "VER00", data, 12);
 	data[12] = 0;
 	return 0;
 }
 
-int omron_get_bp_profile(omron_device* dev, unsigned char* data)
+OMRON_DECLSPEC int omron_get_bp_profile(omron_device* dev, unsigned char* data)
 {
 	omron_dev_info_command(dev, "PRF00", data, 11);
 	return 0;
 }
 
-int omron_get_device_serial(omron_device* dev, unsigned char* data)
+OMRON_DECLSPEC int omron_get_device_serial(omron_device* dev, unsigned char* data)
 {
 	omron_dev_info_command(dev, "SRL00", data, 8);
 	return 0;
 }
 
 //daily data information
-int omron_get_daily_data_count(omron_device* dev, unsigned char bank)
+OMRON_DECLSPEC int omron_get_daily_data_count(omron_device* dev, unsigned char bank)
 {
 	unsigned char data[8];
 	unsigned char command[8] =
@@ -316,13 +316,13 @@ int omron_get_daily_data_count(omron_device* dev, unsigned char bank)
 	return (int)data[6];
 }
 
-omron_bp_day_info* omron_get_all_daily_bp_data(omron_device* dev, int* count)
+OMRON_DECLSPEC omron_bp_day_info* omron_get_all_daily_bp_data(omron_device* dev, int* count)
 {
 	omron_check_mode(dev, DAILY_INFO_MODE);
 	return 0;
 }
 
-omron_bp_day_info omron_get_daily_bp_data(omron_device* dev, int bank, int index)
+OMRON_DECLSPEC omron_bp_day_info omron_get_daily_bp_data(omron_device* dev, int bank, int index)
 {
 	omron_bp_day_info r;
 	unsigned char data[17];
@@ -359,14 +359,14 @@ omron_bp_day_info omron_get_daily_bp_data(omron_device* dev, int bank, int index
 }
 
 //weekly data information
-omron_bp_week_info* omron_get_all_weekly_bp_data(omron_device* dev, int* count)
+OMRON_DECLSPEC omron_bp_week_info* omron_get_all_weekly_bp_data(omron_device* dev, int* count)
 {
 	// omron_bp_week_info* r;
 	omron_check_mode(dev, DEVICE_INFO_MODE);
 	return 0;
 }
 
-omron_bp_week_info omron_get_weekly_bp_data(omron_device* dev, int bank, int index, int evening)
+OMRON_DECLSPEC omron_bp_week_info omron_get_weekly_bp_data(omron_device* dev, int bank, int index, int evening)
 {
 	omron_bp_week_info r;
 	unsigned char data[12];	/* 12? */
@@ -406,7 +406,7 @@ omron_bp_week_info omron_get_weekly_bp_data(omron_device* dev, int bank, int ind
 	return r;
 }
 
-omron_pd_profile_info omron_get_pd_profile(omron_device* dev)
+OMRON_DECLSPEC omron_pd_profile_info omron_get_pd_profile(omron_device* dev)
 {
 	unsigned char data[11];
 	omron_pd_profile_info profile_info;
@@ -416,7 +416,7 @@ omron_pd_profile_info omron_get_pd_profile(omron_device* dev)
 	return profile_info;
 }
 
-omron_pd_count_info omron_get_pd_data_count(omron_device* dev)
+OMRON_DECLSPEC omron_pd_count_info omron_get_pd_data_count(omron_device* dev)
 {
 	omron_pd_count_info count_info;
 	unsigned char data[5];
@@ -426,7 +426,7 @@ omron_pd_count_info omron_get_pd_data_count(omron_device* dev)
 	return count_info;
 }
 
-omron_pd_daily_data omron_get_pd_daily_data(omron_device* dev, int day)
+OMRON_DECLSPEC omron_pd_daily_data omron_get_pd_daily_data(omron_device* dev, int day)
 {
 	omron_pd_daily_data daily_data;
 	unsigned char data[20];
@@ -440,7 +440,7 @@ omron_pd_daily_data omron_get_pd_daily_data(omron_device* dev, int day)
 	return daily_data;
 }
 
-omron_pd_hourly_data* omron_get_pd_hourly_data(omron_device* dev, int day)
+OMRON_DECLSPEC omron_pd_hourly_data* omron_get_pd_hourly_data(omron_device* dev, int day)
 {
 	omron_pd_hourly_data* hourly_data = malloc(sizeof(omron_pd_hourly_data) * 24);
 	unsigned char data[37];

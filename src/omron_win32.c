@@ -272,17 +272,17 @@ int omron_open_win32(omron_device* dev, int VID, int PID, unsigned int device_in
 	return -1;
 }
 
-int omron_get_count(omron_device* dev, int VID, int PID)
+OMRON_DECLSPEC int omron_get_count(omron_device* dev, int VID, int PID)
 {
 	return omron_open_win32(dev, VID, PID, 0, 1);
 }
 
-int omron_open(omron_device* dev, int VID, int PID, unsigned int device_index)
+OMRON_DECLSPEC int omron_open(omron_device* dev, int VID, int PID, unsigned int device_index)
 {
 	return omron_open_win32(dev, VID, PID, device_index, 0);
 }
 
-int omron_close(omron_device* dev)
+OMRON_DECLSPEC int omron_close(omron_device* dev)
 {
 	CloseHandle(dev->device._dev);
 	return 0;
@@ -299,7 +299,8 @@ int omron_set_mode(omron_device* dev, omron_mode mode)
 	}
 	return 0;
 }
-int omron_read_data(omron_device* dev, unsigned char *input_report)
+
+OMRON_DECLSPEC int omron_read_data(omron_device* dev, unsigned char *input_report)
 {
 	int Result;
 	char read[9];
@@ -313,7 +314,7 @@ int omron_read_data(omron_device* dev, unsigned char *input_report)
 	return Result;
 }
 
-int omron_write_data(omron_device* dev, unsigned char *output_report)
+OMRON_DECLSPEC int omron_write_data(omron_device* dev, unsigned char *output_report)
 {
 	int Result;
 	char command[9];
@@ -328,7 +329,7 @@ int omron_write_data(omron_device* dev, unsigned char *output_report)
 	return Result;
 }
 
-omron_device* omron_create()
+OMRON_DECLSPEC omron_device* omron_create()
 {
 	omron_device* s = (omron_device*)malloc(sizeof(omron_device));
 	s->device._is_open = 0;
@@ -336,7 +337,7 @@ omron_device* omron_create()
 	return s;
 }
 
-void omron_delete(omron_device* dev)
+OMRON_DECLSPEC void omron_delete(omron_device* dev)
 {
 	free(dev);
 }

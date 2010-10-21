@@ -41,7 +41,8 @@ INITIALIZE_BUILD()
 
 #Common Options
 
-OPTION_LIBRARY_BUILD_STATIC(ON)
+#OPTION_LIBRARY_BUILD_STATIC(OFF)
+OPTION_LIBRARY_BUILD_SHARED(ON)
 
 ######################################################################################
 # Project specific globals

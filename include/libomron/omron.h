@@ -29,6 +29,13 @@
 #if defined(WIN32)
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+
+//#if defined(OMRON_DYNAMIC)
+#define OMRON_DECLSPEC __declspec(dllexport)
+//#else
+//#define OMRON_DECLSPEC
+//#endif
+
 /**
  * Structure to hold information about Windows HID devices.
  *
@@ -43,7 +50,7 @@ typedef struct {
 	int _is_inited;
 } omron_device_impl;
 #else
-
+#define OMRON_DECLSPEC
 #include "libusb-1.0/libusb.h"
 typedef struct {
 	struct libusb_context* _context;
@@ -303,8 +310,8 @@ extern "C" {
 	 *
 	 * @return Number of devices connected, or < 0 if error
 	 */
-	omron_device* omron_create();
-	void omron_delete(omron_device* dev);
+	OMRON_DECLSPEC omron_device* omron_create();
+	OMRON_DECLSPEC void omron_delete(omron_device* dev);
 
 	/**
 	 * Returns the number of devices connected, though does not specify device type
@@ -315,7 +322,7 @@ extern "C" {
 	 *
 	 * @return Number of devices connected, or < 0 if error
 	 */
-	int omron_get_count(omron_device* dev, int VID, int PID);
+	OMRON_DECLSPEC int omron_get_count(omron_device* dev, int VID, int PID);
 
 	/**
 	 * Returns the number of devices connected, though does not specify device type
@@ -327,7 +334,7 @@ extern "C" {
 	 *
 	 * @return > 0 if ok, otherwise < 0
 	 */
-	int omron_open(omron_device* dev, int VID, int PID, uint32_t device_index);
+	OMRON_DECLSPEC int omron_open(omron_device* dev, int VID, int PID, uint32_t device_index);
 	/**
 	 * Closes an open omron device
 	 *
@@ -335,7 +342,7 @@ extern "C" {
 	 *
 	 * @return > 0 if ok, otherwise < 0
 	 */
-	int omron_close(omron_device* dev);
+	OMRON_DECLSPEC int omron_close(omron_device* dev);
 
 	/**
 	 * Sends the control message to set a new mode for the device
@@ -345,7 +352,7 @@ extern "C" {
 	 *
 	 * @return > 0 if ok, otherwise < 0
 	 */
-	int omron_set_mode(omron_device* dev, omron_mode mode);
+	OMRON_DECLSPEC int omron_set_mode(omron_device* dev, omron_mode mode);
 
 	/**
 	 * Reads data from the device
@@ -355,7 +362,7 @@ extern "C" {
 	 *
 	 * @return > 0 if ok, otherwise < 0
 	 */
-	int omron_read_data(omron_device* dev, uint8_t *input_report);
+	OMRON_DECLSPEC int omron_read_data(omron_device* dev, uint8_t *input_report);
 
 	/**
 	 * Writes data to the device
@@ -365,7 +372,7 @@ extern "C" {
 	 *
 	 * @return > 0 if ok, otherwise < 0
 	 */
-	int omron_write_data(omron_device* dev, uint8_t *output_report);
+	OMRON_DECLSPEC int omron_write_data(omron_device* dev, uint8_t *output_report);
 
 	////////////////////////////////////////////////////////////////////////////////////
 	//
@@ -381,7 +388,7 @@ extern "C" {
 	 *
 	 * @return > 0 if ok, otherwise < 0
 	 */
-	int omron_get_device_serial(omron_device* dev, uint8_t* data);
+	OMRON_DECLSPEC int omron_get_device_serial(omron_device* dev, uint8_t* data);
 
 	/**
 	 * Retrieves the version number of the device
@@ -391,7 +398,7 @@ extern "C" {
 	 *
 	 * @return > 0 if ok, otherwise < 0
 	 */
-	int omron_get_device_version(omron_device* dev, uint8_t* data);
+	OMRON_DECLSPEC int omron_get_device_version(omron_device* dev, uint8_t* data);
 
 	////////////////////////////////////////////////////////////////////////////////////
 	//
@@ -407,7 +414,7 @@ extern "C" {
 	 *
 	 * @return 0 if successful, < 0 otherwise
 	 */
-	int omron_get_bp_profile(omron_device* dev, uint8_t* data);
+	OMRON_DECLSPEC int omron_get_bp_profile(omron_device* dev, uint8_t* data);
 
 	/**
 	 * Get an array of all valid daily data
@@ -417,7 +424,7 @@ extern "C" {
 	 *
 	 * @return Array of omron_bp_day_info packets, length identified by count
 	 */
-	omron_bp_day_info* omron_get_all_daily_bp_data(omron_device* dev, int* count);
+	OMRON_DECLSPEC omron_bp_day_info* omron_get_all_daily_bp_data(omron_device* dev, int* count);
 
 	/**
 	 * Gets a specific data index from a specific bank of readings
@@ -428,7 +435,7 @@ extern "C" {
 	 *
 	 * @return Data packet with requested information
 	 */
-	omron_bp_day_info omron_get_daily_bp_data(omron_device* dev, int bank, int index);
+	OMRON_DECLSPEC omron_bp_day_info omron_get_daily_bp_data(omron_device* dev, int bank, int index);
 
 	/**
 	 * Get an array of all valid weekly data
@@ -438,7 +445,7 @@ extern "C" {
 	 *
 	 * @return Array of omron_bp_week_info packets, length identified by count
 	 */
-	omron_bp_week_info* omron_get_all_weekly_bp_data(omron_device* dev, int* count);
+	OMRON_DECLSPEC omron_bp_week_info* omron_get_all_weekly_bp_data(omron_device* dev, int* count);
 
 	/**
 	 * Gets a specfic data index from a specific bank of readings
@@ -450,7 +457,7 @@ extern "C" {
 	 *
 	 * @return Data packet with requested information
 	 */
-	omron_bp_week_info omron_get_weekly_bp_data(omron_device* dev, int bank, int index, int evening);
+	OMRON_DECLSPEC omron_bp_week_info omron_get_weekly_bp_data(omron_device* dev, int bank, int index, int evening);
 
 	////////////////////////////////////////////////////////////////////////////////////
 	//
@@ -465,7 +472,7 @@ extern "C" {
 	 *
 	 * @return Struct with weight and stride info
 	 */
-	omron_pd_profile_info omron_get_pd_profile(omron_device* dev);
+	OMRON_DECLSPEC omron_pd_profile_info omron_get_pd_profile(omron_device* dev);
 
 	/**
 	 * Query device for number of valid data packets
@@ -474,7 +481,7 @@ extern "C" {
 	 *
 	 * @return Struct with count information
 	 */
-	omron_pd_count_info omron_get_pd_data_count(omron_device* dev);
+	OMRON_DECLSPEC omron_pd_count_info omron_get_pd_data_count(omron_device* dev);
 
 	/**
 	 * Get data for a specific day index
@@ -484,7 +491,7 @@ extern "C" {
 	 *
 	 * @return Struct with data for day
 	 */
-	omron_pd_daily_data omron_get_pd_daily_data(omron_device* dev, int day);
+	OMRON_DECLSPEC omron_pd_daily_data omron_get_pd_daily_data(omron_device* dev, int day);
 
 	/**
 	 * Get hourly data for a specific day index
@@ -494,7 +501,7 @@ extern "C" {
 	 *
 	 * @return Struct with hourly info for day
 	 */
-	omron_pd_hourly_data* omron_get_pd_hourly_data(omron_device* dev, int day);
+	OMRON_DECLSPEC omron_pd_hourly_data* omron_get_pd_hourly_data(omron_device* dev, int day);
 
 #ifdef __cplusplus
 }
