@@ -11,11 +11,13 @@
  * Read LICENSE_BSD.txt for details.
  */
 
-#include "omron.h"
 
+#include "libomron/omron.h"
+
+#include <api/setupapi.h>
+#include <api/hidsdi.h>
+#include <stdlib.h>
 #include <stdio.h>
-#include <setupapi.h>
-#include <hidsdi.h>
 
 //Application global variables
 DWORD								ActualBytesRead;
@@ -76,7 +78,7 @@ void GetDeviceCapabilities(HANDLE DeviceHandle)
 	HidD_FreePreparsedData(PreparsedData);
 }
 
-int omron_open_win32(omron_device_impl* DeviceHandle, int VID, int PID, unsigned int device_index, int get_count)
+int omron_open_win32(omron_device* dev, int VID, int PID, unsigned int device_index, int get_count)
 {
 	//Use a series of API calls to find a HID with a specified Vendor IF and Product ID.
 
@@ -89,7 +91,7 @@ int omron_open_win32(omron_device_impl* DeviceHandle, int VID, int PID, unsigned
 
 	Length = 0;
 	detailData = NULL;
-	*DeviceHandle = NULL;
+	dev->device._dev = NULL;
 
 	/*
 	  API function: HidD_GetHidGuid
@@ -173,7 +175,7 @@ int omron_open_win32(omron_device_impl* DeviceHandle, int VID, int PID, unsigned
 
 			//Allocate memory for the hDevInfo structure, using the returned Length.
 
-			detailData = (PSP_DEVICE_INTERFACE_DETAIL_DATA)malloc(Length);
+ 			detailData = (PSP_DEVICE_INTERFACE_DETAIL_DATA)malloc(Length);
 
 			//Set cbSize in the detailData structure.
 
@@ -201,8 +203,8 @@ int omron_open_win32(omron_device_impl* DeviceHandle, int VID, int PID, unsigned
 			  returned by SetupDiGetDeviceInterfaceDetail.
 			*/
 
-
-			*DeviceHandle =CreateFile
+			
+			dev->device._dev =CreateFile
 				(detailData->DevicePath,
 				 GENERIC_READ | GENERIC_WRITE,
 				 FILE_SHARE_READ|FILE_SHARE_WRITE,
@@ -226,7 +228,7 @@ int omron_open_win32(omron_device_impl* DeviceHandle, int VID, int PID, unsigned
 			Attributes.Size = sizeof(Attributes);
 
 			Result = HidD_GetAttributes
-				(*DeviceHandle,
+				(dev->device._dev,
 				 &Attributes);
 
 			//Is it the desired device?
@@ -238,19 +240,19 @@ int omron_open_win32(omron_device_impl* DeviceHandle, int VID, int PID, unsigned
 				if(get_count)
 				{
 					++device_count;
-					CloseHandle(*DeviceHandle);
+					CloseHandle(dev->device._dev);
 				}
 				else
 				{
 					MyDeviceDetected = TRUE;
 					MyDevicePathName = detailData->DevicePath;
-					GetDeviceCapabilities(*DeviceHandle);
+					GetDeviceCapabilities(dev->device._dev);
 					break;
 				}
 			}
 			else
 			{
-				CloseHandle(*DeviceHandle);
+				CloseHandle(dev->device._dev);
 			}
 			free(detailData);
 		}  //if (Result != 0)
@@ -270,27 +272,26 @@ int omron_open_win32(omron_device_impl* DeviceHandle, int VID, int PID, unsigned
 	return -1;
 }
 
-int omron_get_count(int VID, int PID)
+int omron_get_count(omron_device* dev, int VID, int PID)
 {
-	omron_device test;
-	return omron_open_win32(&test.device, VID, PID, 0, 1);
+	return omron_open_win32(dev, VID, PID, 0, 1);
 }
 
 int omron_open(omron_device* dev, int VID, int PID, unsigned int device_index)
 {
-	return omron_open_win32(&(dev->device), VID, PID, device_index, 0);
+	return omron_open_win32(dev, VID, PID, device_index, 0);
 }
 
 int omron_close(omron_device* dev)
 {
-	CloseHandle(dev->device);
+	CloseHandle(dev->device._dev);
 	return 0;
 }
 
 int omron_set_mode(omron_device* dev, omron_mode mode)
 {
 	char feature_report[3] = {0x0, (mode & 0xff00) >> 8, (mode & 0x00ff)};
-	int ret = HidD_SetFeature(dev->device, feature_report, Capabilities.FeatureReportByteLength);
+	int ret = HidD_SetFeature(dev->device._dev, feature_report, Capabilities.FeatureReportByteLength);
 	if(!ret)
 	{
 		printf("Cannot send feature! %d\n", GetLastError());
@@ -303,7 +304,7 @@ int omron_read_data(omron_device* dev, unsigned char *input_report)
 	int Result;
 	char read[9];
 	Result = ReadFile
-		(dev->device,
+		(dev->device._dev,
 		 read,
 		 Capabilities.InputReportByteLength,
 		 &NumberOfBytesRead,
@@ -319,7 +320,7 @@ int omron_write_data(omron_device* dev, unsigned char *output_report)
 	command[0] = 0x0;
 	memcpy((command+1), output_report, 8);
 	Result = WriteFile
-		(dev->device,
+		(dev->device._dev,
 		 command,
 		 Capabilities.OutputReportByteLength,
 		 &NumberOfBytesRead,
@@ -327,3 +328,15 @@ int omron_write_data(omron_device* dev, unsigned char *output_report)
 	return Result;
 }
 
+omron_device* omron_create()
+{
+	omron_device* s = (omron_device*)malloc(sizeof(omron_device));
+	s->device._is_open = 0;
+	s->device._is_inited = 1;	
+	return s;
+}
+
+void omron_delete(omron_device* dev)
+{
+	free(dev);
+}

@@ -24,7 +24,10 @@
 #define E_NPUTIL_NOT_INITED -2
 #define E_NPUTIL_NOT_OPENED -3
 
+#include <stdint.h>
+
 #if defined(WIN32)
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 /**
  * Structure to hold information about Windows HID devices.
@@ -33,14 +36,14 @@
  */
 typedef struct {
 	/// Windows device handle
-	HANDLE* _dev;
+	HANDLE _dev;
 	/// 0 if device is closed, > 0 otherwise
 	int _is_open;
 	/// 0 if device is initialized, > 0 otherwise
 	int _is_inited;
 } omron_device_impl;
 #else
-#include <stdint.h>
+
 #include "libusb-1.0/libusb.h"
 typedef struct {
 	struct libusb_context* _context;

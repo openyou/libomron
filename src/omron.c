@@ -26,9 +26,9 @@
 #define IF_DEBUG(x)	do { } while (0)
 #endif
 
-#define DPRINTF(args...)	IF_DEBUG(printf(args))
+#define DPRINTF(args, ...)	IF_DEBUG(printf(args))
 
-static void hexdump(void *data, int n_bytes)
+static void hexdump(uint8_t *data, int n_bytes)
 {
 	while (n_bytes--) {
 		printf(" %02x", *(unsigned char*) data);
@@ -158,10 +158,10 @@ int omron_get_command_return(omron_device* dev, int size, unsigned char* data)
 			return read_result;
 		}
 
-		assert(read_result == 8);
+		//assert(read_result == 8);
 		current_read_size = input_report[0];
 		IF_DEBUG(hexdump(input_report, current_read_size+1));
-		DPRINTF(" current_read=%d size=%d total_read_size=%d.\n",
+		printf(" current_read=%d size=%d total_read_size=%d.\n",
 		       current_read_size, size, total_read_size);
 
 		assert(current_read_size <= 8);
@@ -170,7 +170,7 @@ int omron_get_command_return(omron_device* dev, int size, unsigned char* data)
 			current_read_size = 7; /* FIXME? Bug? */
 
 		assert(current_read_size < 8);
-		assert(current_read_size > 0);
+		assert(current_read_size >= 0);
 
 		assert(total_read_size >= 0);
 
@@ -272,13 +272,14 @@ omron_dev_info_command(omron_device* dev,
 		       unsigned char *result,
 		       int result_max_len)
 {
-	unsigned char tmp[result_max_len+3];
+	unsigned char* tmp = (unsigned char*)malloc(result_max_len+3);
 
 	omron_exchange_cmd(dev, PEDOMETER_MODE, strlen(cmd),
 			   (const unsigned char*) cmd,
 			   result_max_len+3, tmp);
 
 	memcpy(result, tmp + 3, result_max_len);
+	free(tmp);
 }
 
 //platform independant functions

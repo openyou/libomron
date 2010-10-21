@@ -10,7 +10,9 @@ int main(int argc, char** argv)
 	int data_count;
 	unsigned char str[30];
 	int bank = 0;
-
+	omron_pd_profile_info p;
+	omron_pd_count_info c;
+	
 	if (argc > 1)
 		bank = atoi(argv[1]);
 
@@ -47,19 +49,20 @@ int main(int argc, char** argv)
 		printf("Device serial: %s\n", str);
 	}
 
-	omron_pd_profile_info p = omron_get_pd_profile(test);
+	p = omron_get_pd_profile(test);
 	printf("Weight: %d pounds\n", p.weight);
 	printf("Stride: %d inches\n", p.stride); 
-	omron_pd_count_info c = omron_get_pd_data_count(test);
+	c = omron_get_pd_data_count(test);
 	printf("Daily Reading Blocks: %d\n", c.daily_count);
 	printf("Hourly Reading Blocks: %d\n", c.hourly_count);
 
 	for(i = 0; i < c.daily_count - 1; ++i)
 	{
 		omron_pd_daily_data d = omron_get_pd_daily_data(test, i + 1);
-		printf("Daily Steps: %d\n", d.total_steps);
 		omron_pd_hourly_data* h = omron_get_pd_hourly_data(test, i + 1);
 		int j;
+		printf("Daily Steps: %d\n", d.total_steps);
+
 		for(j = 0; j < 24; ++j)
 		{
 			printf("Hour: %d - On: %d - Steps:  %d\n", j, h[j].is_attached > 0, h[j].regular_steps);
