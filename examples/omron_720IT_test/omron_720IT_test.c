@@ -4,7 +4,7 @@
 
 int main(int argc, char** argv)
 {
-	omron_device* test;
+	omron_device* test = omron_create();
 	int ret;
 	int i;
 	int data_count;
@@ -14,15 +14,12 @@ int main(int argc, char** argv)
 	if (argc > 1)
 		bank = atoi(argv[1]);
 
-    //Uncomment for libhid debug messages
-	//#ifdef USE_LIBHID
-	//hid_set_debug(HID_DEBUG_ALL);
-	//hid_set_debug_stream(stderr);
-	//hid_set_usb_debug(0);
-	//#endif USE_LIBHID
+	if(test == NULL)
+	{
+		printf("Cannot initialize USB core!\n");
+		return 1;		
+	}
 
-	test = omron_create();
-	
 	ret = omron_get_count(test, OMRON_VID, OMRON_PID);
 
 	if(!ret)
@@ -38,7 +35,7 @@ int main(int argc, char** argv)
 		printf("Cannot open omron 790IT!\n");
 		return 1;
 	}
-	printf("Opened omron 720IT\n", ret);
+	printf("Opened omron 720IT\n");
 
 	ret = omron_get_device_version(test, str);
 	if(ret < 0)
@@ -75,5 +72,7 @@ int main(int argc, char** argv)
 		printf("Cannot close omron 790IT!\n");
 		return 1;
 	}
+
+	omron_delete(test);
 	return 0;
 }

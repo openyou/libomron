@@ -20,13 +20,36 @@
  *
  ******************************************************************************/
 
+#define E_NPUTIL_DRIVER_ERROR -1
+#define E_NPUTIL_NOT_INITED -2
+#define E_NPUTIL_NOT_OPENED -3
+
 #if defined(WIN32)
 #include <windows.h>
-typedef HANDLE omron_device_impl;
+/**
+ * Structure to hold information about Windows HID devices.
+ *
+ * @ingroup CoreFunctions
+ */
+typedef struct {
+	/// Windows device handle
+	HANDLE* _dev;
+	/// 0 if device is closed, > 0 otherwise
+	int _is_open;
+	/// 0 if device is initialized, > 0 otherwise
+	int _is_inited;
+} omron_device_impl;
 #else
 #include <stdint.h>
-#include "nputil/nputil_libusb1.h"
-typedef nputil_libusb1_struct* omron_device_impl;
+#include "libusb-1.0/libusb.h"
+typedef struct {
+	struct libusb_context* _context;
+	struct libusb_device_handle* _device;
+	struct libusb_transfer* _in_transfer;
+	struct libusb_transfer* _out_transfer;
+	int _is_open;
+	int _is_inited;
+} omron_device_impl;
 #endif
 
 /*******************************************************************************
@@ -267,6 +290,18 @@ extern "C" {
 	// Platform Specific Functions
 	//
 	////////////////////////////////////////////////////////////////////////////////////
+	
+	/**
+	 * Returns the number of devices connected, though does not specify device type
+	 *
+	 * @param dev Device pointer
+	 * @param VID Vendor ID, defaults to 0x0590
+	 * @param PID Product ID, defaults to 0x0028
+	 *
+	 * @return Number of devices connected, or < 0 if error
+	 */
+	omron_device* omron_create();
+	void omron_delete(omron_device* dev);
 
 	/**
 	 * Returns the number of devices connected, though does not specify device type
