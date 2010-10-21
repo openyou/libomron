@@ -6,7 +6,7 @@ FIND_PACKAGE(SWIG REQUIRED)
 IF(NOT SWIG_FOUND)
   MESSAGE(STATUS "SWIG not found, not building cross language libraries!")
   RETURN()
-ENDIF())
+ENDIF()
 INCLUDE(${SWIG_USE_FILE})
 
 FIND_PACKAGE(PythonLibs REQUIRED)
