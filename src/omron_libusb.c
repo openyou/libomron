@@ -166,7 +166,6 @@ int omron_read_data(omron_device* dev, uint8_t* input_report)
 {
 	int trans;
 	int ret = libusb_bulk_transfer(dev->device._device, OMRON_IN_ENDPT, input_report, 8, &trans, 1000);
-	printf("%d\n", ret);
 	return ret;
 }
 
