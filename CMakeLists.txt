@@ -87,7 +87,28 @@ ELSEIF(UNIX)
   ENDIF(LIBUSB_1_FOUND)
 ENDIF(WIN32)
 
-ADD_SUBDIRECTORY(include)
+######################################################################################
+# Installation of headers
+######################################################################################
+
+SET(LIBOMRON_INCLUDE_DIRS
+  ${CMAKE_CURRENT_SOURCE_DIR}/libomron
+)
+
+INSTALL(DIRECTORY 
+  ${LIBOMRON_INCLUDE_DIRS}
+  DESTINATION ${INCLUDE_INSTALL_DIR}/libomron
+  )
+
+FOREACH(DIR ${LIBOMRON_INCLUDE_DIRS})
+  FILE(GLOB_RECURSE HEADER_FILES ${DIR}/*.h)
+  LIST(APPEND LIBOMRON_INCLUDE_FILES ${HEADER_FILES})
+ENDFOREACH(DIR ${LIBOMRON_INCLUDE_DIRS})
+
+######################################################################################
+# Subdirectories
+######################################################################################
+
 ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(examples)
 ADD_SUBDIRECTORY(swig)

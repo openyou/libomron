@@ -161,8 +161,8 @@ int omron_get_command_return(omron_device* dev, int size, unsigned char* data)
 		//assert(read_result == 8);
 		current_read_size = input_report[0];
 		IF_DEBUG(hexdump(input_report, current_read_size+1));
-		printf(" current_read=%d size=%d total_read_size=%d.\n",
-		       current_read_size, size, total_read_size);
+		DPRINTF(" current_read=%d size=%d total_read_size=%d.\n",
+				current_read_size, size, total_read_size);
 
 		assert(current_read_size <= 8);
 

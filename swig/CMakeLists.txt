@@ -22,5 +22,5 @@ SET_SOURCE_FILES_PROPERTIES(omron.i PROPERTIES SWIG_FLAGS "-c++")
 
 # Python
 SWIG_ADD_MODULE(omron python omron.i Omron.cxx)
-SWIG_LINK_LIBRARIES(omron ${PYTHON_LIBRARIES})
+SWIG_LINK_LIBRARIES(omron ${PYTHON_LIBRARIES} ${libomron_LIBRARY} ${LIBOMRON_REQUIRED_LIBS})
 INSTALL_PROGRAMS(/python/omron omron.py _omron.so omron_python.so)

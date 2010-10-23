@@ -6,7 +6,7 @@
 #ifndef OMRON_H_SEEN
 #define OMRON_H_SEEN
 
-#include "omron.h"
+#include "libomron/omron.h"
 
 // Not in omron.h's API?
 extern "C" {
@@ -21,7 +21,7 @@ public:
     typedef std::string data;
 
     Omron() {
-	device.device = 0;
+		//device.device = 0;
 	device.device_mode = NULL_MODE;
     }
     ~Omron();
