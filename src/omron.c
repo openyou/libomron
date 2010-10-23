@@ -319,22 +319,32 @@ omron_bp_day_info omron_get_daily_bp_data(omron_device* dev, int bank, int index
 	unsigned char command[8] = {'G', 'M', 'E', 0x00, bank, 0x00,
 				    index, index ^ bank};
 
+	memset(&r, 0 , sizeof(r));
+	memset(data, 0, sizeof(data));
+
 	omron_exchange_cmd(dev, DAILY_INFO_MODE, 8, command,
 			   sizeof(data), data);
 
-	// printf("Daily data:");
-	// hexdump(data, sizeof(data));
-	// printf("\n");
+	//printf("Daily data:");
+	//hexdump(data, sizeof(data));
+	//printf("\n");
 
-	r.year = data[3];
-	r.month = data[4];
-	r.day = data[5];
-	r.hour = data[6];
-	r.minute = data[7];
-	r.second = data[8];
-	r.sys = data[11];
-	r.dia = data[12];
-	r.pulse = data[13];
+	if (data[0] == 'O' && data[1] == 'K') {
+		r.year = data[3];
+		r.month = data[4];
+		r.day = data[5];
+		r.hour = data[6];
+		r.minute = data[7];
+		r.second = data[8];
+		r.unknown_1[0] = data[9];
+		r.unknown_1[1] = data[10];
+		r.sys = data[11];
+		r.dia = data[12];
+		r.pulse = data[13];
+		r.unknown_2[0] = data[14];
+		r.unknown_2[1] = data[15];
+		r.unknown_2[2] = data[16];
+	}
 	return r;
 }
 

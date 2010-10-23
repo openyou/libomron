@@ -1,0 +1,94 @@
+This is a fork of http://github.com/qdot/libomron I use to play around
+with my 790-IT.  Much thanks to qDot for the original heavy lifting!
+The intention here is to scratch my own itch and feed any useful
+improvements back to qDot.
+
+* Overview
+
+This fork adds:
+
+ * Python bindings via SWIG
+
+ * Python utilities including plotting, device autodetection
+
+ * Random bug fixes/improvements on the C side
+
+ * A simple Python/TK GUI app.
+
+* Installation
+
+** Pre-requirements
+
+ * CMake
+
+ * SWIG
+
+** Steps for installation, testing and running
+
+Things are not as polished as they could be, but here is how to go
+from nothing to something.
+ 
+It assumes these locations:
+
+ - git clone to ~/git/libomron
+ - build area in ~/opt/omron-build
+ - install area in ~/opt/omron
+
+0) Clone github repo by going to http://github.com/brettviren/libomron
+   and selecting a method
+
+ cd ~/git
+ git clone ...
+
+1) Go to resulting libomron/ directory and install needed qDot
+   submodule (git://github.com/qdot/compily_buildd.git)
+
+ cd ~/git/libomron
+ git submodule update --init
+
+2) Create and enter installation directory
+
+ mkdir -p ~/opt/omron-build
+ cd ~/opt/omron-build/
+
+3) Run "cmake ~/git/libomron" 
+
+4) Run "make" and optionally "make DESTDIR=~/opt/omron install"
+
+5) Plug in USB and find out device
+
+ lsusb | grep Omron
+ Bus 005 Device 006: ID 0590:0028 Omron Corp. HJ-720IT Pedometer
+
+(note, my 790-IT blood pressure monitor is identified incorectly, but
+that is okay)
+
+6) From the numbers above, set this env. var.:
+
+ export OMRON_DEV=/dev/bus/usb/005/006
+
+7) Check that it is readable and writable by you:
+
+ ls -l $OMRON_DEV
+ groups
+
+8) Finally, run the example to readout stored values
+
+ ~/opt/omron/usr/local/bin/omron_790IT_test
+
+9) Try out the python bindings do:
+
+ export PYTHONPATH=~/opt/omron/usr/local/python
+ python ~/opt/omron/usr/local/python/omron/omron_790IT_test.py
+ # (this will make a omron.sqlite3 in current directory
+ python ~/opt/omron/usr/local/python/omron/store.py
+ # (this will dump omron.sqlite3)
+ python ~/opt/omron/usr/local/python/omron/plot.py 
+ # (this wlil plot all readouts)
+
+10) Try the GUI app
+
+ # Set PYTHONPATH as above, and print help screen
+ python ~/opt/omron/usr/local/python/omron/gui -h
+ # Run it, point it to a data file, can be same one produced above
+ python ~/opt/omron/usr/local/python/omron/gui -f omron.sqlite3
