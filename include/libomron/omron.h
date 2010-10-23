@@ -30,11 +30,11 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-//#if defined(OMRON_DYNAMIC)
+#if defined(OMRON_DYNAMIC)
 #define OMRON_DECLSPEC __declspec(dllexport)
-//#else
-//#define OMRON_DECLSPEC
-//#endif
+#else
+#define OMRON_DECLSPEC
+#endif
 
 /**
  * Structure to hold information about Windows HID devices.
