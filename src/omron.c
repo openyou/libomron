@@ -123,9 +123,7 @@ xor_checksum(unsigned char *data, int len)
 		checksum ^= *(data++);
 
 	if (checksum)
-	{
-		printf("bad checksum 0x%x\n", checksum);
-	}
+		DPRINTF("bad checksum 0x%x\n", checksum);
 
 	return checksum;
 }
@@ -228,7 +226,7 @@ int omron_check_mode(omron_device* dev, omron_mode mode)
 	}
 	else
 	{
-		fprintf(stderr, "omron_exchange_cmd: I/O error, status=%d\n",
+		DPRINTF("omron_exchange_cmd: I/O error, status=%d\n",
 			ret);		
 	}
 	return ret;
@@ -249,15 +247,13 @@ static void omron_exchange_cmd(omron_device *dev,
 		omron_check_mode(dev, mode);
 		omron_send_command(dev, cmd_len, cmd);
 		status = omron_get_command_return(dev, response_len, response);
-		if (status > 0) {
-			printf("garbled (resp_len=%d)\n", response_len);
-		}
+		if (status > 0)
+			DPRINTF("garbled (resp_len=%d)\n", response_len);
 	} while (status > 0);
 
-	if (status < 0) {
-		fprintf(stderr, "omron_exchange_cmd: I/O error, status=%d\n",
+	if (status < 0)
+		DPRINTF("omron_exchange_cmd: I/O error, status=%d\n",
 			status);
-	}
 }
 
 static void
