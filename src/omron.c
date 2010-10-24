@@ -91,9 +91,9 @@ int omron_send_command(omron_device* dev, int size, const unsigned char* buf)
 	return 0;
 }
 
-int omron_check_success(unsigned char *input_report)
+int omron_check_success(unsigned char *input_report, int start_index)
 {
-	return (input_report[1] == 'O' && input_report[2] == 'K') ? 0 : -1;
+	return (input_report[start_index] == 'O' && input_report[start_index + 1] == 'K') ? 0 : -1;
 }
 
 int omron_send_clear(omron_device* dev)
@@ -107,8 +107,7 @@ int omron_send_clear(omron_device* dev)
 	do {
 		omron_send_command(dev, sizeof(zero), zero);
 		read_result = omron_read_data(dev, input_report);
-		printf("Result size: %d\n", read_result);
-	} while (omron_check_success(input_report) != 0);
+	} while (omron_check_success(input_report, 1) != 0);
 
 	return 0;
 }
@@ -161,9 +160,9 @@ int omron_get_command_return(omron_device* dev, int size, unsigned char* data)
 		//assert(read_result == 8);
 		current_read_size = input_report[0];
 		IF_DEBUG(hexdump(input_report, current_read_size+1));
-		DPRINTF(" current_read=%d size=%d total_read_size=%d.\n",
-				current_read_size, size, total_read_size);
-
+		/* printf(" current_read=%d size=%d total_read_size=%d.\n", */
+		/* 		current_read_size, size, total_read_size); */
+	   
 		assert(current_read_size <= 8);
 
 		if (current_read_size == 8)
@@ -176,10 +175,6 @@ int omron_get_command_return(omron_device* dev, int size, unsigned char* data)
 
 
 		assert(current_read_size <= size - total_read_size);
-#if 0
-		assert(current_read_size == 7 ||
-		       current_read_size == size - total_read_size);
-#endif
 
 		memcpy(data + total_read_size, input_report + 1,
 		       current_read_size);
@@ -262,7 +257,6 @@ static void omron_exchange_cmd(omron_device *dev,
 	if (status < 0) {
 		fprintf(stderr, "omron_exchange_cmd: I/O error, status=%d\n",
 			status);
-		exit(1);
 	}
 }
 
@@ -316,12 +310,6 @@ OMRON_DECLSPEC int omron_get_daily_data_count(omron_device* dev, unsigned char b
 	return (int)data[6];
 }
 
-OMRON_DECLSPEC omron_bp_day_info* omron_get_all_daily_bp_data(omron_device* dev, int* count)
-{
-	omron_check_mode(dev, DAILY_INFO_MODE);
-	return 0;
-}
-
 OMRON_DECLSPEC omron_bp_day_info omron_get_daily_bp_data(omron_device* dev, int bank, int index)
 {
 	omron_bp_day_info r;
@@ -335,11 +323,17 @@ OMRON_DECLSPEC omron_bp_day_info omron_get_daily_bp_data(omron_device* dev, int 
 	omron_exchange_cmd(dev, DAILY_INFO_MODE, 8, command,
 			   sizeof(data), data);
 
-	//printf("Daily data:");
-	//hexdump(data, sizeof(data));
-	//printf("\n");
+	/* printf("Daily data:"); */
+	/* hexdump(data, sizeof(data)); */
+	/* printf("\n"); */
 
-	if (data[0] == 'O' && data[1] == 'K') {
+	if (omron_check_success(data, 0) < 0)
+	{
+		r.present = 0;
+	}
+	else
+	{
+		r.present = 1;
 		r.year = data[3];
 		r.month = data[4];
 		r.day = data[5];
@@ -356,14 +350,6 @@ OMRON_DECLSPEC omron_bp_day_info omron_get_daily_bp_data(omron_device* dev, int 
 		r.unknown_2[2] = data[16];
 	}
 	return r;
-}
-
-//weekly data information
-OMRON_DECLSPEC omron_bp_week_info* omron_get_all_weekly_bp_data(omron_device* dev, int* count)
-{
-	// omron_bp_week_info* r;
-	omron_check_mode(dev, DEVICE_INFO_MODE);
-	return 0;
 }
 
 OMRON_DECLSPEC omron_bp_week_info omron_get_weekly_bp_data(omron_device* dev, int bank, int index, int evening)
@@ -383,22 +369,22 @@ OMRON_DECLSPEC omron_bp_week_info omron_get_weekly_bp_data(omron_device* dev, in
 	memset(&r, 0 , sizeof(r));
 	memset(data, 0, sizeof(data));
 
-	/* FIXME: Use WEEKLY_INFO_MODE? */
 	omron_exchange_cmd(dev, WEEKLY_INFO_MODE, 9, command,
 			   sizeof(data), data);
 
-	if (data[0] != 'O' || data[1] != 'K')
+	if (omron_check_success(data, 0) < 0)
+	{
 		r.present = 0;
+	}
 	else {
 		r.present = 1;
-		
-		// printf("Weekly data:");
-		// hexdump(data, sizeof(data));
-		// printf("\n");
+		/* printf("Weekly data:"); */
+		/* hexdump(data, sizeof(data)); */
+		/* printf("\n"); */
 
-		r.year = data[4];
-		r.month = data[5];
-		r.day = data[6];
+		r.year = data[5];
+		r.month = data[6];
+		r.day = data[7];
 		r.sys = data[8] + 25;
 		r.dia = data[9];
 		r.pulse = data[10];

@@ -174,6 +174,8 @@ typedef struct
 	uint32_t pulse;
 	/// No idea
 	uint8_t unknown_2[3];
+	/// 1 if week block is filled, 0 otherwise
+	uint8_t present;
 } omron_bp_day_info;
 
 /**
@@ -183,8 +185,6 @@ typedef struct
  */
 typedef struct
 {
-	/// ???
-	int32_t present;
 	/// always 0x00
 	uint8_t unknown_1;
 	/// always 0x80
@@ -203,6 +203,8 @@ typedef struct
 	int32_t dia;
 	/// Pulse average for week
 	int32_t pulse;
+	/// 1 if week block is filled, 0 otherwise
+	uint8_t present;
 } omron_bp_week_info;
 
 
@@ -417,16 +419,6 @@ extern "C" {
 	OMRON_DECLSPEC int omron_get_bp_profile(omron_device* dev, uint8_t* data);
 
 	/**
-	 * Get an array of all valid daily data
-	 *
-	 * @param dev Device to query
-	 * @param count Pointer to int, to store number of packets in array
-	 *
-	 * @return Array of omron_bp_day_info packets, length identified by count
-	 */
-	OMRON_DECLSPEC omron_bp_day_info* omron_get_all_daily_bp_data(omron_device* dev, int* count);
-
-	/**
 	 * Gets a specific data index from a specific bank of readings
 	 *
 	 * @param dev Device to query
@@ -436,16 +428,6 @@ extern "C" {
 	 * @return Data packet with requested information
 	 */
 	OMRON_DECLSPEC omron_bp_day_info omron_get_daily_bp_data(omron_device* dev, int bank, int index);
-
-	/**
-	 * Get an array of all valid weekly data
-	 *
-	 * @param dev Device to query
-	 * @param count Pointer to int, to store number of packets in array
-	 *
-	 * @return Array of omron_bp_week_info packets, length identified by count
-	 */
-	OMRON_DECLSPEC omron_bp_week_info* omron_get_all_weekly_bp_data(omron_device* dev, int* count);
 
 	/**
 	 * Gets a specfic data index from a specific bank of readings

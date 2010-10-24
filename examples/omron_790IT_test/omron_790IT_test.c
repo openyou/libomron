@@ -60,16 +60,19 @@ int main(int argc, char** argv)
 		printf("Cannot get device prf!\n");
 	}
 
-#if 1
 	for(i = data_count - 1; i >= 0; --i)
 	{
 		omron_bp_day_info r = omron_get_daily_bp_data(test, bank, i);
+		if(!r.present)
+		{
+			i = i + 1;
+			continue;
+		}
 		printf("%.2d/%.2d/20%.2d %.2d:%.2d:%.2d SYS: %3d DIA: %3d PULSE: %3d\n", r.day, r.month, r.year, r.hour, r.minute, r.second, r.sys, r.dia, r.pulse);
 	}
-#endif
 
 	printf("Weekly info:\n");
-	for(i = 0; i < 9; i++) { /* FIXME: Asking for an index above 7 hangs. Is this a hard limit, or do I have to check for the device replying "No"? */
+	for(i = 0; i < 9; i++) {
 	  	omron_bp_week_info w;
 
 		w = omron_get_weekly_bp_data(test, bank, i, 0);
