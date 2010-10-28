@@ -159,7 +159,9 @@ int omron_set_mode(omron_device* dev, omron_mode mode)
 	const uint feature_interface_num = 0;
 	const int REQ_HID_SET_REPORT = 0x09;
 	const int HID_REPORT_TYPE_FEATURE = 3;
-	return libusb_control_transfer(dev->device._device, LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_RECIPIENT_INTERFACE, REQ_HID_SET_REPORT, (HID_REPORT_TYPE_FEATURE << 8) | feature_report_id, feature_interface_num, feature_report, sizeof(feature_report), 1000);
+	int num_bytes_transferred = libusb_control_transfer(dev->device._device, LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_RECIPIENT_INTERFACE, REQ_HID_SET_REPORT, (HID_REPORT_TYPE_FEATURE << 8) | feature_report_id, feature_interface_num, feature_report, sizeof(feature_report), 1000);
+	//We need to return 0 for success here.
+	return !(num_bytes_transferred == sizeof(feature_report));
 }
 
 int omron_read_data(omron_device* dev, uint8_t* input_report)

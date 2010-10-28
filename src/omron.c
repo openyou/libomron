@@ -206,19 +206,11 @@ int omron_check_mode(omron_device* dev, omron_mode mode)
 {
 	int ret;
 
-//#if 0
-	/*
-	  At least under Linux usbfs, I get inconsistent results from
-	  reading data if I uncomment this optimization.  Perhaps
-	  the Omron blood pressure meter may forget its current
-	  mode at times.
-	*/
 	if(dev->device_mode == mode)
 		return 0;
-//#endif
 
 	ret = omron_set_mode(dev, mode);
-	if(ret > 0)
+	if(ret == 0)
 	{
 		dev->device_mode = mode;
 		omron_send_clear(dev);
