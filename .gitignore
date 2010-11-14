@@ -3,3 +3,6 @@
 *.sqlite3
 *.so
 *.out
+build*
+
+

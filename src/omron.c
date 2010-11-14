@@ -1,7 +1,7 @@
 /*
  * Generic function file for Omron Health User Space Driver
  *
- * Copyright (c) 2007-2009 Kyle Machulis/Nonpolynomial Labs <kyle@nonpolynomial.com>
+ * Copyright (c) 2009-2010 Kyle Machulis <kyle@nonpolynomial.com>
  *
  * More info on Nonpolynomial Labs @ http://www.nonpolynomial.com
  *
@@ -11,13 +11,14 @@
  * Read LICENSE_BSD.txt for details.
  */
 
-#include "omron.h"
+#include "libomron/omron.h"
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 
-// #define DEBUG
+//#define DEBUG
 
 #ifdef DEBUG
 #define IF_DEBUG(x)	do { x; } while (0)
@@ -25,9 +26,9 @@
 #define IF_DEBUG(x)	do { } while (0)
 #endif
 
-#define DPRINTF(args...)	IF_DEBUG(printf(args))
+#define DPRINTF(args, ...)	IF_DEBUG(printf(args))
 
-static void hexdump(void *data, int n_bytes)
+static void hexdump(uint8_t *data, int n_bytes)
 {
 	while (n_bytes--) {
 		printf(" %02x", *(unsigned char*) data);
@@ -86,12 +87,13 @@ int omron_send_command(omron_device* dev, int size, const unsigned char* buf)
 		omron_write_data(dev, output_report);
 		total_write_size += current_write_size;
 	}
+
 	return 0;
 }
 
-int omron_check_success(unsigned char *input_report)
+int omron_check_success(unsigned char *input_report, int start_index)
 {
-	return (input_report[1] == 'O' && input_report[2] == 'K') ? 0 : -1;
+	return (input_report[start_index] == 'O' && input_report[start_index + 1] == 'K') ? 0 : -1;
 }
 
 int omron_send_clear(omron_device* dev)
@@ -105,7 +107,7 @@ int omron_send_clear(omron_device* dev)
 	do {
 		omron_send_command(dev, sizeof(zero), zero);
 		read_result = omron_read_data(dev, input_report);
-	} while (omron_check_success(input_report) != 0);
+	} while (omron_check_success(input_report, 1) != 0);
 
 	return 0;
 }
@@ -121,9 +123,7 @@ xor_checksum(unsigned char *data, int len)
 		checksum ^= *(data++);
 
 	if (checksum)
-	{
-		printf("bad checksum 0x%x\n", checksum);
-	}
+		DPRINTF("bad checksum 0x%x\n", checksum);
 
 	return checksum;
 }
@@ -155,28 +155,24 @@ int omron_get_command_return(omron_device* dev, int size, unsigned char* data)
 			return read_result;
 		}
 
-		assert(read_result == 8);
+		//assert(read_result == 8);
 		current_read_size = input_report[0];
 		IF_DEBUG(hexdump(input_report, current_read_size+1));
-		DPRINTF(" current_read=%d size=%d total_read_size=%d.\n",
-		       current_read_size, size, total_read_size);
-
+		/* printf(" current_read=%d size=%d total_read_size=%d.\n", */
+		/* 		current_read_size, size, total_read_size); */
+	   
 		assert(current_read_size <= 8);
 
 		if (current_read_size == 8)
 			current_read_size = 7; /* FIXME? Bug? */
 
 		assert(current_read_size < 8);
-		assert(current_read_size > 0);
+		assert(current_read_size >= 0);
 
 		assert(total_read_size >= 0);
 
 
 		assert(current_read_size <= size - total_read_size);
-#if 0
-		assert(current_read_size == 7 ||
-		       current_read_size == size - total_read_size);
-#endif
 
 		memcpy(data + total_read_size, input_report + 1,
 		       current_read_size);
@@ -210,22 +206,20 @@ int omron_check_mode(omron_device* dev, omron_mode mode)
 {
 	int ret;
 
-//#if 0
-	/*
-	  At least under Linux usbfs, I get inconsistent results from
-	  reading data if I uncomment this optimization.  Perhaps
-	  the Omron blood pressure meter may forget its current
-	  mode at times.
-	*/
 	if(dev->device_mode == mode)
 		return 0;
-//#endif
 
 	ret = omron_set_mode(dev, mode);
 	if(ret == 0)
 	{
 		dev->device_mode = mode;
 		omron_send_clear(dev);
+		return 0;
+	}
+	else
+	{
+		DPRINTF("omron_exchange_cmd: I/O error, status=%d\n",
+			ret);		
 	}
 	return ret;
 }
@@ -245,16 +239,13 @@ static void omron_exchange_cmd(omron_device *dev,
 		omron_check_mode(dev, mode);
 		omron_send_command(dev, cmd_len, cmd);
 		status = omron_get_command_return(dev, response_len, response);
-		if (status > 0) {
-			printf("garbled (resp_len=%d)\n", response_len);
-		}
+		if (status > 0)
+			DPRINTF("garbled (resp_len=%d)\n", response_len);
 	} while (status > 0);
 
-	if (status < 0) {
-		fprintf(stderr, "omron_exchange_cmd: I/O error, status=%d\n",
+	if (status < 0)
+		DPRINTF("omron_exchange_cmd: I/O error, status=%d\n",
 			status);
-		exit(1);
-	}
 }
 
 static void
@@ -263,37 +254,38 @@ omron_dev_info_command(omron_device* dev,
 		       unsigned char *result,
 		       int result_max_len)
 {
-	unsigned char tmp[result_max_len+3];
+	unsigned char* tmp = (unsigned char*)malloc(result_max_len+3);
 
 	omron_exchange_cmd(dev, PEDOMETER_MODE, strlen(cmd),
 			   (const unsigned char*) cmd,
 			   result_max_len+3, tmp);
 
 	memcpy(result, tmp + 3, result_max_len);
+	free(tmp);
 }
 
 //platform independant functions
-int omron_get_device_version(omron_device* dev, unsigned char* data)
+OMRON_DECLSPEC int omron_get_device_version(omron_device* dev, unsigned char* data)
 {
 	omron_dev_info_command(dev, "VER00", data, 12);
 	data[12] = 0;
 	return 0;
 }
 
-int omron_get_bp_profile(omron_device* dev, unsigned char* data)
+OMRON_DECLSPEC int omron_get_bp_profile(omron_device* dev, unsigned char* data)
 {
 	omron_dev_info_command(dev, "PRF00", data, 11);
 	return 0;
 }
 
-int omron_get_device_serial(omron_device* dev, unsigned char* data)
+OMRON_DECLSPEC int omron_get_device_serial(omron_device* dev, unsigned char* data)
 {
 	omron_dev_info_command(dev, "SRL00", data, 8);
 	return 0;
 }
 
 //daily data information
-int omron_get_daily_data_count(omron_device* dev, unsigned char bank)
+OMRON_DECLSPEC int omron_get_daily_data_count(omron_device* dev, unsigned char bank)
 {
 	unsigned char data[8];
 	unsigned char command[8] =
@@ -306,13 +298,7 @@ int omron_get_daily_data_count(omron_device* dev, unsigned char bank)
 	return (int)data[6];
 }
 
-omron_bp_day_info* omron_get_all_daily_bp_data(omron_device* dev, int* count)
-{
-	omron_check_mode(dev, DAILY_INFO_MODE);
-	return 0;
-}
-
-omron_bp_day_info omron_get_daily_bp_data(omron_device* dev, int bank, int index)
+OMRON_DECLSPEC omron_bp_day_info omron_get_daily_bp_data(omron_device* dev, int bank, int index)
 {
 	omron_bp_day_info r;
 	unsigned char data[17];
@@ -329,7 +315,32 @@ omron_bp_day_info omron_get_daily_bp_data(omron_device* dev, int bank, int index
 	//hexdump(data, sizeof(data));
 	//printf("\n");
 
-	if (data[0] == 'O' && data[1] == 'K') {
+        // added by bv
+	// if (data[0] == 'O' && data[1] == 'K') {
+	// 	r.year = data[3];
+	// 	r.month = data[4];
+	// 	r.day = data[5];
+	// 	r.hour = data[6];
+	// 	r.minute = data[7];
+	// 	r.second = data[8];
+	// 	r.unknown_1[0] = data[9];
+	// 	r.unknown_1[1] = data[10];
+	// 	r.sys = data[11];
+	// 	r.dia = data[12];
+	// 	r.pulse = data[13];
+	// 	r.unknown_2[0] = data[14];
+	// 	r.unknown_2[1] = data[15];
+	// 	r.unknown_2[2] = data[16];
+	// }
+	// return r;
+
+	if (omron_check_success(data, 0) < 0)
+	{
+		r.present = 0;
+	}
+	else
+	{
+		r.present = 1;
 		r.year = data[3];
 		r.month = data[4];
 		r.day = data[5];
@@ -348,15 +359,7 @@ omron_bp_day_info omron_get_daily_bp_data(omron_device* dev, int bank, int index
 	return r;
 }
 
-//weekly data information
-omron_bp_week_info* omron_get_all_weekly_bp_data(omron_device* dev, int* count)
-{
-	// omron_bp_week_info* r;
-	omron_check_mode(dev, DEVICE_INFO_MODE);
-	return 0;
-}
-
-omron_bp_week_info omron_get_weekly_bp_data(omron_device* dev, int bank, int index, int evening)
+OMRON_DECLSPEC omron_bp_week_info omron_get_weekly_bp_data(omron_device* dev, int bank, int index, int evening)
 {
 	omron_bp_week_info r;
 	unsigned char data[12];	/* 12? */
@@ -373,22 +376,22 @@ omron_bp_week_info omron_get_weekly_bp_data(omron_device* dev, int bank, int ind
 	memset(&r, 0 , sizeof(r));
 	memset(data, 0, sizeof(data));
 
-	/* FIXME: Use WEEKLY_INFO_MODE? */
 	omron_exchange_cmd(dev, WEEKLY_INFO_MODE, 9, command,
 			   sizeof(data), data);
 
-	if (data[0] != 'O' || data[1] != 'K')
+	if (omron_check_success(data, 0) < 0)
+	{
 		r.present = 0;
+	}
 	else {
 		r.present = 1;
-		
-		// printf("Weekly data:");
-		// hexdump(data, sizeof(data));
-		// printf("\n");
+		/* printf("Weekly data:"); */
+		/* hexdump(data, sizeof(data)); */
+		/* printf("\n"); */
 
-		r.year = data[4];
-		r.month = data[5];
-		r.day = data[6];
+		r.year = data[5];
+		r.month = data[6];
+		r.day = data[7];
 		r.sys = data[8] + 25;
 		r.dia = data[9];
 		r.pulse = data[10];
@@ -396,7 +399,7 @@ omron_bp_week_info omron_get_weekly_bp_data(omron_device* dev, int bank, int ind
 	return r;
 }
 
-omron_pd_profile_info omron_get_pd_profile(omron_device* dev)
+OMRON_DECLSPEC omron_pd_profile_info omron_get_pd_profile(omron_device* dev)
 {
 	unsigned char data[11];
 	omron_pd_profile_info profile_info;
@@ -406,7 +409,7 @@ omron_pd_profile_info omron_get_pd_profile(omron_device* dev)
 	return profile_info;
 }
 
-omron_pd_count_info omron_get_pd_data_count(omron_device* dev)
+OMRON_DECLSPEC omron_pd_count_info omron_get_pd_data_count(omron_device* dev)
 {
 	omron_pd_count_info count_info;
 	unsigned char data[5];
@@ -416,7 +419,7 @@ omron_pd_count_info omron_get_pd_data_count(omron_device* dev)
 	return count_info;
 }
 
-omron_pd_daily_data omron_get_pd_daily_data(omron_device* dev, int day)
+OMRON_DECLSPEC omron_pd_daily_data omron_get_pd_daily_data(omron_device* dev, int day)
 {
 	omron_pd_daily_data daily_data;
 	unsigned char data[20];
@@ -430,7 +433,7 @@ omron_pd_daily_data omron_get_pd_daily_data(omron_device* dev, int day)
 	return daily_data;
 }
 
-omron_pd_hourly_data* omron_get_pd_hourly_data(omron_device* dev, int day)
+OMRON_DECLSPEC omron_pd_hourly_data* omron_get_pd_hourly_data(omron_device* dev, int day)
 {
 	omron_pd_hourly_data* hourly_data = malloc(sizeof(omron_pd_hourly_data) * 24);
 	unsigned char data[37];

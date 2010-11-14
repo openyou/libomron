@@ -1,0 +1,104 @@
+= libomron =
+
+by Kyle Machulis <kyle@nonpolynomial.com>
+
+Nonpolynomial Labs - http://www.nonpolynomial.com
+
+with contributions from
+
+* Brett Viren - SWIG Implementaiton, Python utils
+* And others
+
+== Description ==
+
+libomron is a mainly C-based implementation of the data retreival
+protocol for the USB enabled line of omron home medical
+equipment. Currently, this includes:
+
+* Blood Pressure Monitors
+** HEM-790-IT
+** M10-IT
+* Pedometers
+** HJ-720-IT
+
+While basic communication functions in the library should work for any
+Omron product, there may be differences in packet layout and measure
+units between US/European/Japanese/etc products... We will try to
+cover these as requested, but the library itself is produced in the
+US, so that's what I have easiest access to.
+
+== Package Information ==
+
+Project Information @ http://libomron.nonpolynomial.com
+
+Source repo @ http://www.github.com/qdot/libomron
+
+Releases @ http://www.sourceforge.net/projects/libomron
+
+== A Tale of Two Libraries ==
+
+libomron comes in two flavors: Win32 and libusb-1.0. The Win32 version
+uses direct Win32 DDK calls to access the windows HID system, and
+reads raw reports from there (which means we aren't required to
+install any specific drivers.). libusb-1.0 works for all platforms
+currently supporting the library.
+
+== Library Requirements (For Compilation) ==
+
+* CMake (Required on all platforms) - http://www.cmake.org
+* SWIG (For non-C libraries) - http://www.swig.org
+* WDK (Windows Only) - http://www.microsoft.com/whdc/devtools/WDK/default.mspx
+* libusb-1.0 (All non-windows platforms) - http://www.libusb.org
+
+== Build Notes ==
+
+To build libomron, make a subdirectory in the source dir (called
+whatever you want), then go into that directory and run
+"cmake ..". This will generate the project files for your platform
+(makefiles for OS X and linux, visual studio for windows). For more
+information on project generators, look at the cmake documentation.
+
+== Notes on Compilation and Usage ==
+
+=== Mac OS X ===
+
+You will need to install the "Omron OS X Extension" in order to use
+omron software on OS X. The file and installation instructions are
+available on the libomron sourceforge site. Note that there are
+two different version of the kext, one for 10.4 and earlier, and the
+other for 10.5 and later.
+
+=== Linux ===
+
+The VID/PID pair of the omron will need to be blacklisted on linux in
+order to use libomron there without requiring root access. This can be
+done either in the kernel or through udev. 
+
+== License ==
+
+---------------------
+Copyright (c) 2009-2010, Kyle Machulis/Nonpolynomial Labs
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the Kyle Machulis/Nonpolynomial Labs nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY Kyle Machulis/Nonpolynomial Labs ''AS IS'' AND ANY
+EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL Kyle Machulis/Nonpolynomial Labs BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
+---------------------
