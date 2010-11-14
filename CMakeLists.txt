@@ -48,7 +48,7 @@ INITIALIZE_BUILD()
 
 OPTION_LIBRARY_BUILD_STATIC(ON)
 OPTION_LIBRARY_BUILD_SHARED(ON)
-OPTION_LIBRARY_BUILD_FRAMEWORK(OFF)
+#OPTION_LIBRARY_BUILD_FRAMEWORK(OFF)
 OPTION_BUILD_RPATH(ON)
 
 ######################################################################################
@@ -92,7 +92,7 @@ ENDIF(WIN32)
 ######################################################################################
 
 SET(LIBOMRON_INCLUDE_DIRS
-  ${CMAKE_CURRENT_SOURCE_DIR}/libomron
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/libomron
 )
 
 INSTALL(DIRECTORY 
@@ -112,8 +112,4 @@ ENDFOREACH(DIR ${LIBOMRON_INCLUDE_DIRS})
 ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(examples)
 ADD_SUBDIRECTORY(swig)
-<<<<<<< HEAD
 ADD_SUBDIRECTORY(python)
-=======
-# ADD_SUBDIRECTORY(python)
->>>>>>> qdot/master
