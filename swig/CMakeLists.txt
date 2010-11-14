@@ -7,6 +7,7 @@ IF(NOT SWIG_FOUND)
   MESSAGE(STATUS "SWIG not found, not building cross language libraries!")
   RETURN()
 ENDIF()
+MESSAGE(STATUS "Using SWIG!")
 INCLUDE(${SWIG_USE_FILE})
 
 FIND_PACKAGE(PythonLibs REQUIRED)
@@ -23,4 +24,4 @@ SET_SOURCE_FILES_PROPERTIES(omron.i PROPERTIES SWIG_FLAGS "-c++")
 # Python
 SWIG_ADD_MODULE(omron python omron.i Omron.cxx)
 SWIG_LINK_LIBRARIES(omron ${PYTHON_LIBRARIES} ${libomron_LIBRARY} ${LIBOMRON_REQUIRED_LIBS})
-INSTALL_PROGRAMS(/python/omron omron.py _omron.so omron_python.so)
+INSTALL_PROGRAMS(/python/omron omron.py ../lib/_omron.so)
