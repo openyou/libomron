@@ -2,7 +2,7 @@
 # Build function for omron_790IT_test
 ######################################################################################
 
-SET(LIBOMRON_EXAMPLE_LIBS ${libomron_LIBRARY} ${LIBOMRON_REQUIRED_LIBS})
+SET(LIBOMRON_EXAMPLE_LIBS ${libomron_LIBRARY} ${LIBOMRON_REQUIRED_LIBS} -lm)
 
 SET(EXAMPLES omron_720IT_test omron_790IT_test)
 
