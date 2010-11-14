@@ -1,6 +1,6 @@
 %module omron
 %{
-#include "omron.h"
+#include "libomron/omron.h"
 #include "Omron.h"
 %}
 
@@ -11,7 +11,15 @@
 %array_functions(unsigned char, CharArray);
 
 %ignore omron_get_daily_bp_data_count;
-%rename(get_count) omron_get_count;
+%ignore OMRON_VID;		/* access as just VID */
+%ignore OMRON_PID;		/* access as just PID */
 
-%include "omron.h"
+%rename(get_count) omron_get_count;
+%rename(create_device) omron_create;
+%rename(delete_device) omron_delete;
+
+%typemap(in) uint32_t = int;
+%typemap(out) uint32_t = int;
+
+%include "libomron/omron.h"
 %include "Omron.h"

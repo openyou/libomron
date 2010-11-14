@@ -4,6 +4,7 @@ Gui for reading and plotting out blood pressure values via libomron.
 '''
 
 
+import omron
 import Tkinter as tk
 import matplotlib 
 matplotlib.use('TkAgg') 
@@ -136,12 +137,11 @@ class Gui(object):
 
     def cb_acquire(self): 
         print 'Acquiring data'
-        import omron
         import store
 
         omron_obj = omron.Omron()
 
-        if omron_obj.open(omron.OMRON_790IT_PID, omron.OMRON_790IT_VID) < 0:
+        if omron_obj.open() < 0:
             print 'Failed to open device'
             return
 

@@ -1,19 +1,24 @@
 #!/usr/bin/env python
 
-import os, sys
 import omron, store, device
+import os, sys
 
-print 'Using',device.device()
+print sys.path
+devfile = device.device()
+print 'Using', devfile, omron.VID, omron.PID
 
-ret = omron.get_count(omron.OMRON_790IT_VID,omron.OMRON_790IT_PID)
+dev = omron.create_device()
+print dev, dev.device._is_inited
+ret = omron.get_count(dev, omron.VID, omron.PID)
+print ret
 if not ret:
-    print 'No omron 790ITs connected!'
+    print 'No omron device!'
     sys.exit(1)
-print 'Found %d omron 790ITs'%ret
+print 'Found %d omron'%ret
 
 o = omron.Omron()
 print 'Openning'
-ret = o.open(omron.OMRON_790IT_VID, omron.OMRON_790IT_PID)
+ret = o.open()
 if ret < 0:
     print 'Cannot open omron 790IT'
     sys.exit(1)
@@ -46,6 +51,7 @@ d = store.Data()
 for ind in range(data_count-1,-1,-1):
     for trial in range(3):
         r = o.get_daily_bp_data(ind)
+        print ind,trial,r.year,r.month,r.day,r.hour,r.minute,r.second
         if bad_data(r): continue
         break
 

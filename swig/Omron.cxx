@@ -1,2 +1,6 @@
 #include "Omron.h"
-Omron::~Omron() {}
+Omron::~Omron()
+{
+    if (device) omron_close(device);
+    device = 0;
+}
