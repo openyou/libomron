@@ -69,14 +69,14 @@ typedef struct {
  ******************************************************************************/
 
 /// Vendor ID for all omron health devices
-const static uint32_t OMRON_VID = 0x0590;
+static const uint32_t OMRON_VID = 0x0590;
 /// Product ID for all omron health devices
-const static uint32_t OMRON_PID = 0x0028;
+static const uint32_t OMRON_PID = 0x0028;
 
 /// Out endpoint for all omron health devices
-const static uint32_t OMRON_OUT_ENDPT = 0x02;
+static const uint32_t OMRON_OUT_ENDPT = 0x02;
 /// In endpoint for all omron health devices
-const static uint32_t OMRON_IN_ENDPT  = 0x81;
+static const uint32_t OMRON_IN_ENDPT  = 0x81;
 
 /*******************************************************************************
  *
