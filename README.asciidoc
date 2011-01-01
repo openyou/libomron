@@ -33,7 +33,7 @@ Project Information @ http://libomron.nonpolynomial.com
 
 Source repo @ http://www.github.com/qdot/libomron
 
-Releases @ http://www.sourceforge.net/projects/libomron
+Releases @ http://www.sourceforge.net/projects/nplabs
 
 == A Tale of Two Libraries ==
 
@@ -47,6 +47,7 @@ currently supporting the library.
 
 * CMake (Required on all platforms) - http://www.cmake.org
 * SWIG (For non-C libraries) - http://www.swig.org
+* Python (with dev libraries, for python lib) - http://www.python.org
 * WDK (Windows Only) - http://www.microsoft.com/whdc/devtools/WDK/default.mspx
 * libusb-1.0 (All non-windows platforms) - http://www.libusb.org
 
@@ -64,9 +65,8 @@ information on project generators, look at the cmake documentation.
 
 You will need to install the "Omron OS X Extension" in order to use
 omron software on OS X. The file and installation instructions are
-available on the libomron sourceforge site. Note that there are
-two different version of the kext, one for 10.4 and earlier, and the
-other for 10.5 and later.
+available on the libomron sourceforge site, or in the mac binary
+package if one is available. The kext should work on 10.5 or later.
 
 === Linux ===
 
