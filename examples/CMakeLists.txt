@@ -2,7 +2,12 @@
 # Build function for omron_790IT_test
 ######################################################################################
 
-SET(LIBOMRON_EXAMPLE_LIBS ${libomron_LIBRARY} ${LIBOMRON_REQUIRED_LIBS} -lm)
+SET(LIBOMRON_EXAMPLE_LIBS ${libomron_LIBRARY} ${LIBOMRON_REQUIRED_LIBS})
+
+#linux needs math lib
+IF(UNIX AND NOT APPLE)
+  LIST(APPEND LIBOMRON_EXAMPLE_LIBS m)
+ENDIF()
 
 SET(EXAMPLES omron_720IT_test omron_790IT_test)
 

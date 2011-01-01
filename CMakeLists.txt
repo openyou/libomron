@@ -107,6 +107,10 @@ FOREACH(DIR ${LIBOMRON_INCLUDE_DIRS})
   LIST(APPEND LIBOMRON_INCLUDE_FILES ${HEADER_FILES})
 ENDFOREACH(DIR ${LIBOMRON_INCLUDE_DIRS})
 
+IF(BUILD_SHARED AND WIN32)
+  ADD_DEFINITION("OMRON_DYNAMIC")
+ENDIF()
+
 ######################################################################################
 # Subdirectories
 ######################################################################################
