@@ -1,4 +1,4 @@
-libnifalcon ChangeLog
+libomron ChangeLog
 =====================
 Numbers refer to bug listings for libnifalcon bug tracking system
 
