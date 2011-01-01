@@ -108,7 +108,7 @@ FOREACH(DIR ${LIBOMRON_INCLUDE_DIRS})
 ENDFOREACH(DIR ${LIBOMRON_INCLUDE_DIRS})
 
 IF(BUILD_SHARED AND WIN32)
-  ADD_DEFINITION("OMRON_DYNAMIC")
+  ADD_DEFINITIONS(-DOMRON_DYNAMIC)
 ENDIF()
 
 ######################################################################################
