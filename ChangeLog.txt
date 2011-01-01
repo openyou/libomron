@@ -1,0 +1,8 @@
+libnifalcon ChangeLog
+=====================
+Numbers refer to bug listings for libnifalcon bug tracking system
+
+2010-12-31 Kyle Machulis <kyle@nonpolynomial.com>
+	* Release v0.9.0
+	* First release, but comes with support for 720-compatible Pedometers and 790-IT-compatible BP Monitors on windows/linux/mac
+	* Includes SWIG and Python library (Thanks to Brett Viren)
