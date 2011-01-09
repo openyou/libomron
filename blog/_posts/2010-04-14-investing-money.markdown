@@ -1,6 +1,7 @@
 ---
 layout: post
 project: libomron
+pledgie: 14372
 title: Investing Money
 ---
 
