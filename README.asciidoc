@@ -9,17 +9,22 @@ with contributions from
 * Brett Viren - SWIG Implementaiton, Python utils
 * And others
 
+If you find libomron useful, please donate to the project at http://www.pledgie.com/campaigns/14372
+
 == Description ==
 
 libomron is a mainly C-based implementation of the data retreival
 protocol for the USB enabled line of omron home medical
-equipment. Currently, this includes:
+equipment. 
 
-* Blood Pressure Monitors
-** HEM-790-IT
-** M10-IT
-* Pedometers
-** HJ-720-IT
+== Supported Hardware ==
+
+_Blood Pressure Monitors_
+* HEM-790-IT
+* M10-IT
+
+_Pedometers_
+* HJ-720-IT
 
 While basic communication functions in the library should work for any
 Omron product, there may be differences in packet layout and measure
@@ -50,6 +55,15 @@ currently supporting the library.
 * Python (with dev libraries, for python lib) - http://www.python.org
 * WDK (Windows Only) - http://www.microsoft.com/whdc/devtools/WDK/default.mspx
 * libusb-1.0 (All non-windows platforms) - http://www.libusb.org
+
+To build on Ubuntu, you can pull the following packages to build the
+project from source.
+
+* libusb-1.0-0-dev
+* cmake
+* cmake-data
+
+For OS X, there are build files available for homebrew and macports.
 
 == Build Notes ==
 
