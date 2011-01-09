@@ -1,7 +1,7 @@
 ---
 layout: post
 project: libomron
-pledgie: 14372
+pledgie: 14378
 title: libomron Version 0.9 released
 ---
 

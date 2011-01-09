@@ -1,7 +1,7 @@
 ---
 layout: front
 project: libomron
-pledgie: 14372
+pledgie: 14378
 title: Open source driver for Omron USB products
 ---
 
