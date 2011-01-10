@@ -1,1 +1,1 @@
-INSTALL_FILES(/python/omron ".py$")
+# INSTALL_FILES(/python/omron ".py$")
