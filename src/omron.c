@@ -58,6 +58,21 @@ int bcd_to_int(unsigned char *data, int start, int length)
 	return ret;
 }
 
+/*
+* For data not starting on byte boundaries
+*/
+int bcd_to_int2(unsigned char *data, int start_nibble, int len_nibbles)
+{
+	int ret = 0;
+	int nib, abs_nib, i;
+	for(i=0; i < len_nibbles; i++) {
+		abs_nib = start_nibble + i;
+		nib = (data[abs_nib / 2] >> (4 * (1 - abs_nib % 2))) & 0x0F;
+		ret += nib * pow(10, len_nibbles - i - 1);
+	}
+	return ret;
+}
+
 short short_to_bcd(int number)
 {
 	return ((number/10) << 4) | (number % 10);
@@ -429,7 +444,13 @@ OMRON_DECLSPEC omron_pd_daily_data omron_get_pd_daily_data(omron_device* dev, in
 	// assert(bank < 2);
 	omron_exchange_cmd(dev, PEDOMETER_MODE, sizeof(command), command,
 			   sizeof(data), data);
-	daily_data.total_steps = bcd_to_int(data, 3, 5);
+	daily_data.total_steps = bcd_to_int2(data, 6, 5);
+	daily_data.total_aerobic_steps = bcd_to_int2(data, 11, 5);
+	daily_data.total_aerobic_walking_time = bcd_to_int2(data, 16, 4);
+	daily_data.total_calories = bcd_to_int2(data, 20, 5);
+	daily_data.total_distance = bcd_to_int2(data, 25, 5) / 100.0;
+	daily_data.total_fat_burn = bcd_to_int2(data, 30, 4) / 10.0;
+	daily_data.day_serial = day;
 	return daily_data;
 }
 
@@ -453,7 +474,8 @@ OMRON_DECLSPEC omron_pd_hourly_data* omron_get_pd_hourly_data(omron_device* dev,
 			hourly_data[hour].is_attached = (data[(offset)] & (1 << 6)) > 0;
 			hourly_data[hour].regular_steps = ((data[(offset)] & (~0xc0)) << 8) | (data[(offset) + 1]);
 			hourly_data[hour].aerobic_steps = ((data[(offset) + 2] & (~0xc0)) << 8) | (data[(offset) + 3]);
-
+			hourly_data[hour].hour_serial = hour;
+			hourly_data[hour].day_serial = day;
 		}
 	}
 	return hourly_data;

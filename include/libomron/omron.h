@@ -259,13 +259,13 @@ typedef struct
 	int32_t total_steps;
 	/// Total number of "aerobic" steps for the day
 	int32_t total_aerobic_steps;
-	/// Total time spent walking throughout the day (in minutes)
-	int32_t total_walking_time;
-	/// Total calories burned
+	/// Total time spent "aerobically" walking throughout the day (in minutes)
+	int32_t total_aerobic_walking_time;
+	/// Total calories burned kcal
 	int32_t total_calories;
-	/// Total distance (steps * stride)
+	/// Total distance (steps * stride) miles
 	float total_distance;
-	/// Total fat burned
+	/// Total fat burned grams
 	float total_fat_burn;
 	/// Offset of date from current day
 	int32_t day_serial;
