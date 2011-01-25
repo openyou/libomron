@@ -247,7 +247,8 @@ static void omron_exchange_cmd(omron_device *dev,
 			       unsigned char *response)
 {
 	int status;
-
+	struct timeval timeout;
+	
 	// Retry command if the response is garbled, but accept "NO" as
 	// a valid response.
 	do {
@@ -256,6 +257,14 @@ static void omron_exchange_cmd(omron_device *dev,
 		status = omron_get_command_return(dev, response_len, response);
 		if (status > 0)
 			DPRINTF("garbled (resp_len=%d)\n", response_len);
+		if(mode == PEDOMETER_MODE) {
+			DPRINTF("Sleeping\n");
+			// Adding a short wait to see if it helps the bad data
+			// give it 0.15 seconds to recover
+			timeout.tv_sec = 0;
+			timeout.tv_usec = 150000;
+			select(0, NULL, NULL, NULL, &timeout);
+		}
 	} while (status > 0);
 
 	if (status < 0)
