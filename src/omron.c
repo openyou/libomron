@@ -473,6 +473,7 @@ OMRON_DECLSPEC omron_pd_hourly_data* omron_get_pd_hourly_data(omron_device* dev,
 			int hour = (i * 8) + j;
 			hourly_data[hour].is_attached = (data[(offset)] & (1 << 6)) > 0;
 			hourly_data[hour].regular_steps = ((data[(offset)] & (~0xc0)) << 8) | (data[(offset) + 1]);
+			hourly_data[hour].event = (data[(offset) + 2] & (1 << 6)) > 0;
 			hourly_data[hour].aerobic_steps = ((data[(offset) + 2] & (~0xc0)) << 8) | (data[(offset) + 3]);
 			hourly_data[hour].hour_serial = hour;
 			hourly_data[hour].day_serial = day;

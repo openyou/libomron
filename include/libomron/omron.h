@@ -284,8 +284,10 @@ typedef struct
 	int32_t day_serial;
 	/// Index of hour
 	int32_t hour_serial;
-	/// Was anything happening for the pedometer to record?
+	/// Was anything happening for the pedometer to record? this also acts as an hour done flag for the current hour; contains 0 even if there is data
 	uint8_t is_attached;
+	/// Was an event recorded this hour?
+	uint8_t event;
 	/// Regular steps taken
 	int32_t regular_steps;
 	/// Aerobic steps taken
