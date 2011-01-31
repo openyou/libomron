@@ -433,6 +433,17 @@ OMRON_DECLSPEC omron_pd_profile_info omron_get_pd_profile(omron_device* dev)
 	return profile_info;
 }
 
+OMRON_DECLSPEC int omron_clear_pd_memory(omron_device* dev)
+{
+	unsigned char data[2];
+	omron_exchange_cmd(dev, PEDOMETER_MODE, strlen("CTD00"),"CTD00", 2, data);
+	if((data[0]=='O') && (data[1]=='K')) {
+		return 0;
+	} else {
+		return 1;
+	}
+}
+
 OMRON_DECLSPEC omron_pd_count_info omron_get_pd_data_count(omron_device* dev)
 {
 	omron_pd_count_info count_info;

@@ -486,6 +486,14 @@ extern "C" {
 	 * @return Struct with hourly info for day
 	 */
 	OMRON_DECLSPEC omron_pd_hourly_data* omron_get_pd_hourly_data(omron_device* dev, int day);
+	/**
+	 * Clear the flash memory one the device
+	 *
+	 * @param dev Device to query
+	 *
+	 * @return 0 on success
+	 */
+	OMRON_DECLSPEC int omron_clear_pd_memory(omron_device* dev);
 
 #ifdef __cplusplus
 }
