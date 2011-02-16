@@ -61,15 +61,19 @@ int main(int argc, char** argv)
 	{
 		if(i < c.daily_count) {
 			omron_pd_daily_data d = omron_get_pd_daily_data(test, i);
-			printf("%d Days Ago Steps: %d Aerobic Steps: %d\n", i, d.total_steps, d.total_aerobic_steps);
+			printf("DRB D: %2d -Steps: %d -aSteps: %d\n", i, d.total_steps, d.total_aerobic_steps);
 		}
 		if(i < c.hourly_count) {
 			omron_pd_hourly_data* h = omron_get_pd_hourly_data(test, i);
 			int j;
+			int tots = 0, tota = 0;
 			for(j = 0; j < 24; ++j)
 			{
-				printf("Hour: %d - On: %d - Steps:  %d\n", j, h[j].is_attached > 0, h[j].regular_steps);
+				printf("D: %2d -H: %2d -On: %d -Steps: %5d -aSteps: %5d\n", i, j, h[j].is_attached > 0, h[j].regular_steps, h[j].aerobic_steps);
+				tots += h[j].regular_steps;
+				tota += h[j].aerobic_steps;
 			}
+			printf("HRB D: %2d -Steps: %d -aSteps: %d\n", i, tots, tota);
 			free(h);
 		}
 	}

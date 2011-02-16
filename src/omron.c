@@ -449,9 +449,6 @@ OMRON_DECLSPEC omron_pd_count_info omron_get_pd_data_count(omron_device* dev)
 	omron_pd_count_info count_info;
 	unsigned char data[5];
 	omron_dev_info_command(dev, "CNT00", data, 5);
-	hexdump(data, 5);
-	//count_info.daily_count = bcd_to_int(data, 0, 4);
-	//count_info.hourly_count = bcd_to_int(data, 2, 4);
 	count_info.daily_count = data[1];
 	count_info.hourly_count = data[3];
 	return count_info;
