@@ -262,7 +262,7 @@ static void omron_exchange_cmd(omron_device *dev,
 			// Adding a short wait to see if it helps the bad data
 			// give it 0.15 seconds to recover
 			timeout.tv_sec = 0;
-			timeout.tv_usec = 150000;
+			timeout.tv_usec = 200000;
 			select(0, NULL, NULL, NULL, &timeout);
 		}
 	} while (status > 0);
@@ -449,8 +449,11 @@ OMRON_DECLSPEC omron_pd_count_info omron_get_pd_data_count(omron_device* dev)
 	omron_pd_count_info count_info;
 	unsigned char data[5];
 	omron_dev_info_command(dev, "CNT00", data, 5);
-	count_info.daily_count = bcd_to_int(data, 0, 4);
-	count_info.hourly_count = bcd_to_int(data, 2, 4);
+	hexdump(data, 5);
+	//count_info.daily_count = bcd_to_int(data, 0, 4);
+	//count_info.hourly_count = bcd_to_int(data, 2, 4);
+	count_info.daily_count = data[1];
+	count_info.hourly_count = data[3];
 	return count_info;
 }
 
@@ -459,7 +462,7 @@ OMRON_DECLSPEC omron_pd_daily_data omron_get_pd_daily_data(omron_device* dev, in
 	omron_pd_daily_data daily_data;
 	unsigned char data[20];
 	unsigned char command[7] =
-		{ 'M', 'E', 'S', 0x00, 0x00, short_to_bcd(day), 0x00 ^ short_to_bcd(day)};
+		{ 'M', 'E', 'S', 0x00, 0x00, day, 0x00 ^ day};
 
 	// assert(bank < 2);
 	omron_exchange_cmd(dev, PEDOMETER_MODE, sizeof(command), command,
@@ -484,7 +487,7 @@ OMRON_DECLSPEC omron_pd_hourly_data* omron_get_pd_hourly_data(omron_device* dev,
 	for(i = 0; i < 3; ++i)
 	{
 		unsigned char command[8] =
-			{ 'G', 'T', 'D', 0x00, 0, short_to_bcd(day), i + 1, short_to_bcd(day) ^ (i + 1)};
+			{ 'G', 'T', 'D', 0x00, 0, day, i + 1, day ^ (i + 1)};
 		omron_exchange_cmd(dev, PEDOMETER_MODE, sizeof(command), command,
 						   sizeof(data), data);
 		for(j = 0; j <= 7; ++j)
