@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>		/* atoi */
 #include <time.h>
+#include <unistd.h> /* getopt */
 
 #define SECONDS_PER_DAY 86400
 
@@ -20,9 +21,15 @@ int main(int argc, char** argv)
 	char time_str[20];
 	struct tm *timeptr;
 	time_t today_secs, other_secs;
+	int ch, clear_flag = 0;
 	
-	if (argc > 1)
-		bank = atoi(argv[1]);
+	while((ch = getopt(argc, argv, "d")) != -1) {
+		switch (ch) {
+		case 'd':	
+			clear_flag = 1;
+			break;
+		}
+	}
 
 	if(test == NULL)
 	{
@@ -101,6 +108,9 @@ int main(int argc, char** argv)
 			
 			free(h);
 		}
+	}
+	if(clear_flag) {
+		ret = omron_clear_pd_memory(test);
 	}
 	ret = omron_close(test);
 	if(ret < 0)
