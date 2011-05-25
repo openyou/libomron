@@ -259,13 +259,13 @@ typedef struct
 	int32_t total_steps;
 	/// Total number of "aerobic" steps for the day
 	int32_t total_aerobic_steps;
-	/// Total time spent walking throughout the day (in minutes)
-	int32_t total_walking_time;
-	/// Total calories burned
+	/// Total time spent "aerobically" walking throughout the day (in minutes)
+	int32_t total_aerobic_walking_time;
+	/// Total calories burned kcal
 	int32_t total_calories;
-	/// Total distance (steps * stride)
+	/// Total distance (steps * stride) miles
 	float total_distance;
-	/// Total fat burned
+	/// Total fat burned grams
 	float total_fat_burn;
 	/// Offset of date from current day
 	int32_t day_serial;
@@ -284,8 +284,10 @@ typedef struct
 	int32_t day_serial;
 	/// Index of hour
 	int32_t hour_serial;
-	/// Was anything happening for the pedometer to record?
+	/// Was anything happening for the pedometer to record? this also acts as an hour done flag for the current hour; contains 0 even if there is data
 	uint8_t is_attached;
+	/// Was an event recorded this hour?
+	uint8_t event;
 	/// Regular steps taken
 	int32_t regular_steps;
 	/// Aerobic steps taken
@@ -484,6 +486,14 @@ extern "C" {
 	 * @return Struct with hourly info for day
 	 */
 	OMRON_DECLSPEC omron_pd_hourly_data* omron_get_pd_hourly_data(omron_device* dev, int day);
+	/**
+	 * Clear the flash memory one the device
+	 *
+	 * @param dev Device to query
+	 *
+	 * @return 0 on success
+	 */
+	OMRON_DECLSPEC int omron_clear_pd_memory(omron_device* dev);
 
 #ifdef __cplusplus
 }

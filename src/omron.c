@@ -58,6 +58,21 @@ int bcd_to_int(unsigned char *data, int start, int length)
 	return ret;
 }
 
+/*
+* For data not starting on byte boundaries
+*/
+int bcd_to_int2(unsigned char *data, int start_nibble, int len_nibbles)
+{
+	int ret = 0;
+	int nib, abs_nib, i;
+	for(i=0; i < len_nibbles; i++) {
+		abs_nib = start_nibble + i;
+		nib = (data[abs_nib / 2] >> (4 * (1 - abs_nib % 2))) & 0x0F;
+		ret += nib * pow(10, len_nibbles - i - 1);
+	}
+	return ret;
+}
+
 short short_to_bcd(int number)
 {
 	return ((number/10) << 4) | (number % 10);
@@ -232,7 +247,8 @@ static void omron_exchange_cmd(omron_device *dev,
 			       unsigned char *response)
 {
 	int status;
-
+	struct timeval timeout;
+	
 	// Retry command if the response is garbled, but accept "NO" as
 	// a valid response.
 	do {
@@ -241,6 +257,14 @@ static void omron_exchange_cmd(omron_device *dev,
 		status = omron_get_command_return(dev, response_len, response);
 		if (status > 0)
 			DPRINTF("garbled (resp_len=%d)\n", response_len);
+		if(mode == PEDOMETER_MODE) {
+			DPRINTF("Sleeping\n");
+			// Adding a short wait to see if it helps the bad data
+			// give it 0.15 seconds to recover
+			timeout.tv_sec = 0;
+			timeout.tv_usec = 200000;
+			select(0, NULL, NULL, NULL, &timeout);
+		}
 	} while (status > 0);
 
 	if (status < 0)
@@ -409,13 +433,24 @@ OMRON_DECLSPEC omron_pd_profile_info omron_get_pd_profile(omron_device* dev)
 	return profile_info;
 }
 
+OMRON_DECLSPEC int omron_clear_pd_memory(omron_device* dev)
+{
+	unsigned char data[2];
+	omron_exchange_cmd(dev, PEDOMETER_MODE, strlen("CTD00"),"CTD00", 2, data);
+	if((data[0]=='O') && (data[1]=='K')) {
+		return 0;
+	} else {
+		return 1;
+	}
+}
+
 OMRON_DECLSPEC omron_pd_count_info omron_get_pd_data_count(omron_device* dev)
 {
 	omron_pd_count_info count_info;
 	unsigned char data[5];
 	omron_dev_info_command(dev, "CNT00", data, 5);
-	count_info.daily_count = bcd_to_int(data, 0, 4);
-	count_info.hourly_count = bcd_to_int(data, 2, 4);
+	count_info.daily_count = data[1];
+	count_info.hourly_count = data[3];
 	return count_info;
 }
 
@@ -424,12 +459,18 @@ OMRON_DECLSPEC omron_pd_daily_data omron_get_pd_daily_data(omron_device* dev, in
 	omron_pd_daily_data daily_data;
 	unsigned char data[20];
 	unsigned char command[7] =
-		{ 'M', 'E', 'S', 0x00, 0x00, short_to_bcd(day), 0x00 ^ short_to_bcd(day)};
+		{ 'M', 'E', 'S', 0x00, 0x00, day, 0x00 ^ day};
 
 	// assert(bank < 2);
 	omron_exchange_cmd(dev, PEDOMETER_MODE, sizeof(command), command,
 			   sizeof(data), data);
-	daily_data.total_steps = bcd_to_int(data, 3, 5);
+	daily_data.total_steps = bcd_to_int2(data, 6, 5);
+	daily_data.total_aerobic_steps = bcd_to_int2(data, 11, 5);
+	daily_data.total_aerobic_walking_time = bcd_to_int2(data, 16, 4);
+	daily_data.total_calories = bcd_to_int2(data, 20, 5);
+	daily_data.total_distance = bcd_to_int2(data, 25, 5) / 100.0;
+	daily_data.total_fat_burn = bcd_to_int2(data, 30, 4) / 10.0;
+	daily_data.day_serial = day;
 	return daily_data;
 }
 
@@ -443,7 +484,7 @@ OMRON_DECLSPEC omron_pd_hourly_data* omron_get_pd_hourly_data(omron_device* dev,
 	for(i = 0; i < 3; ++i)
 	{
 		unsigned char command[8] =
-			{ 'G', 'T', 'D', 0x00, 0, short_to_bcd(day), i + 1, short_to_bcd(day) ^ (i + 1)};
+			{ 'G', 'T', 'D', 0x00, 0, day, i + 1, day ^ (i + 1)};
 		omron_exchange_cmd(dev, PEDOMETER_MODE, sizeof(command), command,
 						   sizeof(data), data);
 		for(j = 0; j <= 7; ++j)
@@ -452,8 +493,10 @@ OMRON_DECLSPEC omron_pd_hourly_data* omron_get_pd_hourly_data(omron_device* dev,
 			int hour = (i * 8) + j;
 			hourly_data[hour].is_attached = (data[(offset)] & (1 << 6)) > 0;
 			hourly_data[hour].regular_steps = ((data[(offset)] & (~0xc0)) << 8) | (data[(offset) + 1]);
+			hourly_data[hour].event = (data[(offset) + 2] & (1 << 6)) > 0;
 			hourly_data[hour].aerobic_steps = ((data[(offset) + 2] & (~0xc0)) << 8) | (data[(offset) + 3]);
-
+			hourly_data[hour].hour_serial = hour;
+			hourly_data[hour].day_serial = day;
 		}
 	}
 	return hourly_data;
