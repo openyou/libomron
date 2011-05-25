@@ -21,6 +21,7 @@ equipment.
 
 _Blood Pressure Monitors_
 * HEM-790-IT
+* BP-791-IT
 * M10-IT
 
 _Pedometers_
