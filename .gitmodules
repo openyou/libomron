@@ -1,3 +1,0 @@
-[submodule "compily_buildd"]
-	path = compily_buildd
-	url = git://github.com/qdot/compily_buildd.git
