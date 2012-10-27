@@ -1,0 +1,8 @@
+ACTION!="add|change", GOTO="mm_libomron_end"
+SUBSYSTEM!="usb", GOTO="mm_libomron_end"
+ENV{DEVTYPE}!="usb_device", GOTO="mm_libomron_end"
+
+# Omron Corp. HP-720IT Pedometer / Blood Pressure Monitor HEM-7080IT-E
+ATTRS{idVendor}=="0590", ATTRS{idProduct}=="0028", ENV{ID_MM_LIBOMRON}="1", SYMLINK+="libomron-%k", MODE="0664", GROUP="plugdev"
+
+LABEL="mm_libomron_end"
